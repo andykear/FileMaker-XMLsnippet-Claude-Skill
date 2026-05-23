@@ -50,6 +50,16 @@ Once the skill is installed, Claude will automatically apply it when you ask for
 **With a DDR:**
 > Attach your DDR and Claude will use real field, layout, and script names from your solution
 
+---
+
+## Pasting into FileMaker
+
+The Script Workspace requires a specific clipboard format — not plain text. Two approaches that work:
+
+- **MBS Plugin** — use `MBS("Clipboard.SetFileMakerObjects")` to write the correct clipboard flavour
+- **Terminal (Mac, no plugin)** — use `pbcopy` as per [crumpled's approach](https://community.claris.com/en/s/question/0D5Vy00002bv5WIKAY/)
+
+---
 
 ## Specification highlights
 
