@@ -54,10 +54,9 @@ Once the skill is installed, Claude will automatically apply it when you ask for
 
 ## Pasting into FileMaker
 
-The Script Workspace requires a specific clipboard format — not plain text. Two approaches that work:
+The Script Workspace requires a specific clipboard format — not plain text. An approaches that work:
 
-- **MBS Plugin** 
-- **Terminal (Mac, no plugin)** — use `pbcopy` as per [crumpled's approach](https://community.claris.com/en/s/question/0D5Vy00002bv5WIKAY/)
+- **MBS Plugin**
 
 ---
 
