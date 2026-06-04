@@ -106,7 +106,7 @@ Found a step that doesn't round-trip? Native export that contradicts the spec? O
 
 | Version | Notes |
 |---------|-------|
-| 1.10.4 | Added support for custom functions |
+| 1.10.4 | Added support for custom functions v1.10.4 fixes an installation path issue affecting all previous versions|
 | 1.10.3 | Removed changelog, validation suite, and step index appendices to reduce token load. Public release. |
 | 1.10.2 | Removed pre-release version history narrative |
 | 1.10 | First complete version. All AI steps (212–228) added. Placeholder-ID pattern documented. |
