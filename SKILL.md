@@ -34,7 +34,7 @@ handler actually accepts.
 **Before writing or reviewing any FileMaker XML, read the full rules file:**
 
 ```
-references/filemaker_xml_rules.md
+filemaker_xml_rules.md
 ```
 
 This file (v1.10.4, ~3,000 lines) is the complete specification. It contains:
@@ -56,7 +56,7 @@ in the `Configure RAG Account ` step name) that only appear in the spec.
 
 When the user provides FileMaker XML to review:
 
-1. Read `references/filemaker_xml_rules.md` first.
+1. Read `filemaker_xml_rules.md` first.
 2. Check against the three known silent-failure modes (§7):
    - **7.1** — `<Name>` tag emitted as single-letter `<n>` (Set Variable loses variable name)
    - **7.2** — compact/single-line form instead of expanded child form
