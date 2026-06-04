@@ -1,19 +1,19 @@
 ---
 name: filemaker-xml
 description: >
-  Use this skill whenever the user wants to work with FileMaker script XML.
+  Use this skill whenever the user wants to work with FileMaker script XML or custom function XML.
   This includes: generating FileMaker XML from a description, pseudocode, or
   script steps; analysing or reviewing existing FileMaker XML for errors or
   silent-failure risks; converting scripts between formats; or any task where
-  the output must be paste-ready XML for the FileMaker Script Workspace.
+  the output must be paste-ready XML for the FileMaker Script Workspace or Manage Custom Functions dialog.
   Trigger any time the user mentions FileMaker scripts, fmxmlsnippet, Set
-  Variable XML, script step XML, or asks to produce XML that can be pasted
+  Variable XML, script step XML, custom function XML, or asks to produce XML that can be pasted
   into FileMaker. Always use this skill — do not attempt FileMaker XML tasks
   from memory alone, as the format has undocumented paste-handler rules that
   cause silent failures without this reference.
 ---
 
-# FileMaker Script XML Skill
+# FileMaker Script & Custom Function XML Skill
 
 ## Overview
 
@@ -37,7 +37,7 @@ handler actually accepts.
 references/filemaker_xml_rules.md
 ```
 
-This file (v1.10.3, ~2,900 lines) is the complete specification. It contains:
+This file (v1.10.4, ~3,000 lines) is the complete specification. It contains:
 - Paste format requirements (§1–2)
 - Set Variable canonical structure and the `<Name>` tag rendering trap (§3, §7)
 - Common conventions: `<Name>` tag, schema references, comparison operators (§5)
@@ -123,3 +123,4 @@ The rules file is large. Key sections for quick navigation:
 - **Appendix A** — Configured-form reference skeletons  
 - **Appendix B** — Known name quirks (trailing spaces, etc.)  
 - **Appendix C** — Round-trip validation cases  
+- **§11** — Custom functions (skeleton, attributes, parameters, recursion)  
