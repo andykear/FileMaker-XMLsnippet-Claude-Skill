@@ -74,7 +74,7 @@ When the user provides FileMaker XML to review:
 
 When the user wants to generate FileMaker XML from a description or pseudocode:
 
-1. Read `references/filemaker_xml_rules.md` first.
+1. Read `filemaker_xml_rules.md` first.
 2. Identify each script step needed and look up its canonical skeleton in §8.
 3. Apply §1 paste format requirements throughout:
    - Wrap in `<?xml version="1.0" encoding="UTF-8"?>\n<fmxmlsnippet type="FMObjectList">...\n</fmxmlsnippet>`
