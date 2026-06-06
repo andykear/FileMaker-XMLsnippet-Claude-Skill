@@ -75,7 +75,7 @@ Once the skill is installed, Claude will automatically apply it when you ask for
 
 ## Pasting into FileMaker
 
-The Script Workspace requires a specific clipboard format — not plain text. The most reliable verified method is the **MBS Plugin**. Other approaches exist but are not verified by Clockwork.
+Layout mode requires the `fmxmlsnippet type="LayoutObjectList"` format on the clipboard in FileMaker's internal clipboard format — not plain text. This skill has been tested with the **MBS Plugin** installed. Plugin-free clipboard conversion options are available in the FileMaker community and should work with this format, but have not been tested by Clockwork.
 
 ---
 
