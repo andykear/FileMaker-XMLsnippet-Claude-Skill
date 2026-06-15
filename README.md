@@ -101,7 +101,23 @@ Once the skill is installed, Claude will automatically apply it when you ask for
 
 ## Pasting into FileMaker
 
-Layout mode requires the `fmxmlsnippet type="LayoutObjectList"` format on the clipboard in FileMaker's internal clipboard format, not plain text. This skill has been tested with the **MBS Plugin** installed. Plugin free clipboard conversion options are available in the FileMaker community and should work with this format, but have not been tested by Clockwork.
+Layout mode requires the `fmxmlsnippet type="LayoutObjectList"` format on the clipboard in FileMaker's internal clipboard format — not plain text. This skill has been tested with the **MBS Plugin** installed. Plugin-free clipboard conversion options are available in the FileMaker community and should work with this format, but have not been tested by Clockwork.
+
+---
+
+## Companion skill
+
+This skill covers Script objects.
+There are 3 companion skills covering Scripts, Field and Layout plus an XML inspector app.
+
+[FileMaker Script XML Skill](https://github.com/andykear/FileMaker-XMLsnippet-Claude-Skill) — script steps for the Script Workspace
+
+[FileMaker Layout XML Skill](https://github.com/andykear/FileMaker-XMLsnippet-Layout-Claude-Skill) — layout objects for Layout mode
+
+[FileMaker Field Definitions XML Skill ](https://github.com/andykear/FileMaker-XML-field-definitions) — field definitions for Manage Database
+
+[FileMaker XML Inspector](https://github.com/andykear/FileMaker-XML-inspector-open-source) - Browser based XML Inspector.
+
 
 ---
 
