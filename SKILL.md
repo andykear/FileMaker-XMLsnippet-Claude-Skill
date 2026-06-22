@@ -31,7 +31,7 @@ handler actually accepts.
 
 ## Mandatory reading — progressive loading
 
-The specification (v1.11) is split so a task loads only the sections it
+The specification (v1.12) is split so a task loads only the sections it
 needs. The rules are:
 
 1. **Always read `references/core.md` first.** Not optional. It contains
@@ -75,7 +75,9 @@ structure is a silent-failure trap, so it lives with the core rules).
 
 **`steps-windows-files.md`** — Adjust Window, Arrange All Windows, Close Data File, Close File, Close Window, Convert File, Create Data File, Delete File, Freeze Window, Get Data File Position, Get File Exists, Get File Size, Move/Resize Window, New File, New Window, Open Data File, Open File, Print, Print Setup, Read from Data File, Recover File, Refresh Window, Rename File, Save a Copy as, Save a Copy as XML, Scroll Window, Select Window, Set Data File Position, Set Multi-User, Set Use System Formats, Set Window Title, Set Zoom Level, Show/Hide Menubar, Show/Hide Text Ruler, Show/Hide Toolbars, View As, Write to Data File
 
-**`steps-accounts-ai-misc.md`** — Add Account, Allow Formatting Bar, AVPlayer Play, AVPlayer Set Options, AVPlayer Set Playback State, Beep, Change Password, Check Found Set, Check Record, Check Selection, Configure AI Account, Configure Local Notification, Configure Machine Learning Model, Configure NFC Reading, Configure Prompt Template, Configure RAG Account, Configure Region Monitor Script, Configure Regression Model, Correct Word, Delete Account, Dial Phone, Edit User Dictionary, Enable Account, Enable Touch Keyboard, Execute FileMaker Data API, Execute SQL, Exit Application, Fine-Tune Model, Flush Cache to Disk, Generate Response from Model, Get Folder Path, Insert Embedding, Insert Embedding in Found Set, Install Menu Set, Install Plug-In File, Open URL, Perform AppleScript, Perform Find by Natural Language, Perform JavaScript in Web Viewer, Perform RAG Action, Perform Semantic Find, Perform SQL Query by Natural Language, Re-Login, Refresh Object, Refresh Portal, Reset Account Password, Save a Copy as Add-on Package, Select Dictionaries, Send DDE Execute, Send Event, Send Mail, Set AI Call Logging, Set Dictionary, Set Session Identifier, Set Web Viewer, Show Custom Dialog, Speak, Spelling Options
+**`steps-accounts-ai-misc.md`** — Add Account, Allow Formatting Bar, AVPlayer Play, AVPlayer Set Options, AVPlayer Set Playback State, Beep, Change Password, Check Found Set, Check Record, Check Selection, Configure AI Account, Configure Local Notification, Configure Machine Learning Model, Configure NFC Reading, Configure Persistent Data, Configure Prompt Template, Configure RAG Account, Configure Region Monitor Script, Configure Regression Model, Correct Word, Delete Account, Dial Phone, Edit User Dictionary, Enable Account, Enable Touch Keyboard, Execute FileMaker Data API, Execute SQL, Exit Application, Fine-Tune Model, Flush Cache to Disk, Flush Web Viewer Cookies, Generate Response from Model, Get Folder Path, Insert Embedding, Insert Embedding in Found Set, Insert Image Caption, Insert Image Captions in Found Set, Install Menu Set, Install Plug-In File, Open URL, Perform AppleScript, Perform Find by Natural Language, Perform JavaScript in Web Viewer, Perform RAG Action, Perform Semantic Find, Perform SQL Query by Natural Language, Re-Login, Refresh Object, Refresh Portal, Reset Account Password, Save a Copy as Add-on Package, Select Dictionaries, Send DDE Execute, Send Event, Send Mail, Set AI Call Logging, Set Dictionary, Set Session Identifier, Set Web Viewer, Show Custom Dialog, Speak, Spelling Options
+
+**`steps-pdf.md`** — Append PDF, Cancel PDF, Close PDF, Create PDF, Open PDF, Print PDF
 
 **`steps-plugin.md`** — all MBS and other plugin steps (External step structure, §9)
 

@@ -2,7 +2,7 @@
 
 A Claude skill that gives AI models a deterministic, empirically verified foundation for generating and analysing FileMaker Script Workspace XML (`fmxmlsnippet type="FMObjectList"`).
 
-Developed by [Clockwork Creative Technology](https://www.clockworkct.co.uk) and shared openly with the FileMaker/Claris community.
+Developed by Andrew Kear of [Clockwork Creative Technology](https://www.clockworkct.co.uk) and shared openly with the FileMaker/Claris community.
 
 ---
 
@@ -21,6 +21,21 @@ The XML shape is knowable. This spec makes it known.
 AI models are generative by nature. They predict, they infer, they improvise. That is exactly what you want when reasoning about business logic. It is exactly what you do not want when the XML element order determines whether FileMaker silently drops your script steps.
 
 This skill keeps AI focused on what it is good at. The structure is handled deterministically. Claude handles the logic.
+
+---
+
+## New in v1.12: FM 26 support
+
+v1.12 adds full FileMaker Pro 2026 support. Ten new script steps are
+documented with round-trip verified skeletons, including a complete
+PDF Files category (Create PDF, Open PDF, Append PDF, Print PDF,
+Close PDF, Cancel PDF) and persistent data store support (Configure
+Persistent Data). Existing steps updated for FM 26 changes include
+Save Records as PDF (three PDFSaveType modes, appearance attribute),
+Show Custom Dialog (size and position), Set Zoom Level (Custom
+calculation), Configure AI Account (all five providers), and Save a
+Copy as XML (catalog selection). All new and updated skeletons are
+round-trip verified against FM 26.
 
 ---
 
@@ -50,12 +65,13 @@ The result is a formal specification for a format that Claris has never document
 SKILL.md                            — Claude skill definition + routing index
 references/
   core.md                           — Paste rules, conventions, Set Variable,
-                                      silent failures, appendices (§1–7, A, B)
+                                      silent failures, appendices (§1–7, A, B, C)
   steps-control.md                  — §8.1 Control
   steps-navigation-editing.md       — §8.3–8.4
   steps-fields-records.md           — §8.5–8.7
   steps-windows-files.md            — §8.8–8.9
   steps-accounts-ai-misc.md         — §8.2, §8.10–8.14
+  steps-pdf.md                      — §8.15 PDF Files (FM 26)
   steps-plugin.md                   — §9 Plugin steps (MBS)
   custom-functions.md               — §11 Custom Functions
   worked-example.md                 — §10 Worked example (optional)
@@ -123,8 +139,10 @@ There are 3 companion skills covering Scripts, Field and Layout plus an XML insp
 
 ## Specification highlights
 
-- All ~190 step IDs verified against native FileMaker 2025 export
+- All ~190 step IDs verified against native FileMaker 2025 export, extended to ~220 for FM 26
 - Canonical XML skeletons for every step
+- FM 26 PDF workflow steps with configured forms (Create, Open, Append, Print, Close, Cancel PDF)
+- FM 26 Configure Persistent Data with set/delete modes and the plain-text Name trap
 - Set Variable silent drop trap documented and solved
 - Configured form examples for the most commonly used steps
 - MBS plugin step structure (§9)
@@ -149,6 +167,7 @@ Found a step that doesn't round trip? Native export that contradicts the spec? O
 
 | Version | Notes |
 |---------|-------|
+| 1.12 | FM 26 (FileMaker Pro 2026) support. 10 new steps: PDF Files category (Create PDF, Open PDF, Append PDF, Print PDF, Close PDF, Cancel PDF), Configure Persistent Data, Insert Image Caption, Insert Image Captions in Found Set, Flush Web Viewer Cookies. Configured forms round-trip verified for all PDF steps, Configure Persistent Data (set and delete), Configure AI Account (all five providers), Show Custom Dialog (size/position), Set Zoom Level (Custom calculation), Replace Field Contents (auto-enter options), Constrain Found Set (Find without indexes). Save Records as PDF fully mapped: PDFSaveType (File, Target, Append), source, and appearance enumerations. Updated Save a Copy as XML (catalog selection). DisableStepCollapsed universal element documented. 16 Open menu steps added. New error codes 605-608, 829-833. |
 | 1.11 | Progressive loading restructure: spec split into core rules plus on demand step category files with a routing index. Simple tasks load around 55% fewer reference tokens than v1.10, typical tasks around 40% fewer, worst case parity. No specification content removed; all skeletons preserved verbatim. No option steps consolidated into tables. |
 | 1.10.4 | Added support for custom functions. Fixes an installation path issue affecting all previous versions |
 | 1.10.3 | Removed changelog, validation suite, and step index appendices to reduce token load. Public release. |
