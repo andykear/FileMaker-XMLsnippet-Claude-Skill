@@ -1,6 +1,6 @@
 # Step Reference — Windows and Files (§8.8–8.9)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.11.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -132,6 +132,18 @@ also changes when these options are toggled. See Appendix A.
   </Step>
 ```
 
+FM 26 Custom calculation (round-trip verified):
+```
+  <Step enable="True" id="97" name="Set Zoom Level">
+    <Lock state="False"/>
+    <Zoom value="ByCalculation"/>
+    <Calculation><![CDATA[zoom percentage expression]]></Calculation>
+  </Step>
+```
+
+`<Zoom>` enumeration: `100`, `75`, `50`, `25`, `150`, `200`, `300`,
+`400`, `ByCalculation`. Custom takes an integer from 25 to 400.
+
 #### Show/Hide Menubar (166)
 ```
   <Step enable="True" id="166" name="Show/Hide Menubar">
@@ -257,11 +269,61 @@ including any spacing):
 ```
 
 #### Save a Copy as XML (3)
+
+v1.11 skeleton (pre-FM 26):
 ```
   <Step enable="True" id="3" name="Save a Copy as XML">
     <Option state="False"/>
   </Step>
 ```
+
+FM 26 expanded (from native Copy output):
+```
+  <Step enable="True" id="3" name="Save a Copy as XML">
+    <Option state="False"/>
+    <OutputEntireBinaryData state="False"/>
+    <SpecifyJSONOptions state="False"/>
+    <SaXML>
+      <JSONOptions>
+        <Calculation><![CDATA[JSONSetElement ( "{}" ;
+  [ "catalogs_included" ; JSONMakeArray (
+  "PersistentStoreCatalog
+  BaseDirectoryCatalog
+  FileAccessCatalog
+  ExternalDataSourceCatalog
+  BaseTableCatalog
+  TableOccurrenceCatalog
+  CustomFunctionsCatalog
+  ValueListCatalog
+  FieldCatalog
+  RelationshipCatalog
+  CustomMenuCatalog
+  CustomMenuSetCatalog
+  ScriptCatalog
+  ThemeCatalog
+  LayoutCatalog
+  LibraryCatalog
+  PrivilegeSetsCatalog
+  ExtendedPrivilegesCatalog
+  AccountsCatalog
+  Metadata"
+  ; " " ; JSONString ) ; JSONArray ] ;
+  [ "include_details" ; False ; JSONBoolean ] ;
+  [ "split_catalogs" ; False ; JSONBoolean ] ;
+  [ "standalone_binarydata" ; False ; JSONBoolean ]
+)]]></Calculation>
+      </JSONOptions>
+    </SaXML>
+  </Step>
+```
+
+FM 26 new elements:
+- `<OutputEntireBinaryData>` — include full binary data for layout
+  objects.
+- `<SpecifyJSONOptions>` — whether JSON catalog selection is
+  configured.
+- `<SaXML>` → `<JSONOptions>` → `<Calculation>` — catalog
+  configuration as a JSONSetElement expression.
 
 #### Set Multi-User (84)
 ```

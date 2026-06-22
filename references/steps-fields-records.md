@@ -1,6 +1,6 @@
 # Step Reference — Fields, Records and Found Sets (§8.5–8.7)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.11.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -85,9 +85,13 @@ including any spacing):
     <DeviceOptions>
       <Camera choice="Back"/>
       <Resolution choice="Full"/>
+      <LightMode choice="Auto"/>
     </DeviceOptions>
   </Step>
 ```
+
+FM 26 adds `<LightMode>` inside `<DeviceOptions>` for controlling
+the device flash. Enumeration: `Auto`, `On`, `Off`.
 
 #### Insert from Index (11)
 ```
@@ -181,6 +185,14 @@ Notes:
     <SerialNumbers PerformAutoEnter="False" UpdateEntryOptions="False" increment="0" InitialValue="" UseEntryOptions="False"/>
   </Step>
 ```
+
+FM 26 adds `PerformAutoEnter` and `UseEntryOptions` attributes to
+`<SerialNumbers>`. The `increment` and `InitialValue` attributes are
+only present in serial number replacement mode; they may be absent in
+other modes.
+
+`<With>` values: `None`, `CurrentContents` (FM 26). Other expected
+values for serial number and calculation modes not yet documented.
 
 #### Set Field (76)
 ```
@@ -307,6 +319,12 @@ including any spacing):
 ```
 
 #### Save Records as PDF (144)
+
+Now also part of the "PDF Files" category in FM 26 Script Workspace.
+See §8.15 (`steps-pdf.md`) for the related Create/Open/Append/Close/
+Cancel/Print PDF steps.
+
+Unconfigured (FM 26):
 ```
   <Step enable="True" id="144" name="Save Records as PDF">
     <NoInteract state="True"/>
@@ -316,6 +334,7 @@ including any spacing):
     <AutoOpen state="False"/>
     <CreateEmail state="False"/>
     <PDFOptions source="RecordsBeingBrowsed">
+      <PDFSaveType>File</PDFSaveType>
       <Document>
         <Pages AllPages="True">
           <NumberFrom>
@@ -336,6 +355,72 @@ including any spacing):
     </PDFOptions>
   </Step>
 ```
+
+FM 26 adds `<PDFSaveType>` inside `<PDFOptions>` (all round-trip
+verified):
+
+| PDFSaveType | Save to mode | Target elements |
+|-------------|-------------|-----------------|
+| `File` | File path | `<UniversalPathList>` as Step child |
+| `Target` | Container field or variable | `<Text/>` + `<Field>` as Step children |
+| `Append` | Currently open PDF | No path/target elements; requires prior Create PDF or Open PDF |
+
+`<PDFOptions>` attributes (all round-trip verified):
+
+| Attribute | Values | Notes |
+|-----------|--------|-------|
+| `source` | `RecordsBeingBrowsed`, `CurrentRecord`, `BlankRecord` | |
+| `appearance` | `AsFormatted`, `WithBoxes`, `WithUnderlines`, `WithPlaceholderText` | BlankRecord only; absent for other source values |
+
+Configured with Specify options (round-trip verified):
+```
+  <Step enable="True" id="144" name="Save Records as PDF">
+    <NoInteract state="True"/>
+    <Option state="True"/>
+    <CreateDirectories state="True"/>
+    <Restore state="True"/>
+    <AutoOpen state="False"/>
+    <CreateEmail state="False"/>
+    <UniversalPathList>file:"filename.pdf"</UniversalPathList>
+    <Calculation><![CDATA[1]]></Calculation>
+    <PDFOptions source="RecordsBeingBrowsed">
+      <PDFSaveType>File</PDFSaveType>
+      <Document>
+        <Title>
+          <Calculation><![CDATA[title]]></Calculation>
+        </Title>
+        <Subject>
+          <Calculation><![CDATA[subject]]></Calculation>
+        </Subject>
+        <Author>
+          <Calculation><![CDATA[author]]></Calculation>
+        </Author>
+        <Keywords>
+          <Calculation><![CDATA[keywords]]></Calculation>
+        </Keywords>
+        <Pages AllPages="True">
+          <NumberFrom>
+            <Calculation><![CDATA[1]]></Calculation>
+          </NumberFrom>
+        </Pages>
+      </Document>
+      <Security allowScreenReader="True" enableCopying="True" controlEditing="InsertingDeletingRotatingPages" controlPrinting="LowResolution" requireControlEditPassword="True" requireOpenPassword="True">
+        <OpenPassword>
+          <Calculation><![CDATA[password]]></Calculation>
+        </OpenPassword>
+        <ControlPassword>
+          <Calculation><![CDATA[password]]></Calculation>
+        </ControlPassword>
+      </Security>
+      <View magnification="100" pageLayout="SinglePage" show="PagesPanelAndPage"/>
+    </PDFOptions>
+  </Step>
+```
+
+Notes:
+- Bare `<Calculation>` between `<UniversalPathList>` and `<PDFOptions>` appears when Restore is True with options configured.
+- `<PageRange>` drops out when configured with `AllPages="True"` and Restore.
+- When Append mode, Document and Initial View settings are ignored at runtime (but present in XML).
 
 #### Save Records as Snapshot Link (152)
 ```
@@ -391,6 +476,11 @@ including any spacing):
     <Restore state="False"/>
   </Step>
 ```
+
+FM 26 adds "Find without indexes" option. In the XML this is
+`<Option state="True"/>` — the existing element toggled. No new
+element. May improve performance on small found sets with indexed
+criteria fields.
 
 With saved find criteria:
 ```

@@ -1,6 +1,6 @@
 # Step Reference — Configure, Accounts, AI, Spelling, Menus, Miscellaneous (§8.2, §8.10–8.14)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.11.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -26,6 +26,61 @@ silent failure modes there apply to every step below.
     <MonitorType value="iBeacon"/>
   </Step>
 ```
+
+#### Configure Persistent Data (238)
+
+Sets or deletes an entry in the per-file persistent data store
+(Draco Catalog). Entries survive file close, Data Migration Tool,
+and session restarts. Read values with `GetPersistentData()` and
+`ListPersistentDataIDs()`.
+
+Options: `Name` (required text), `Instance ID` (optional text
+calculation), `Value` (expression, data type preserved) or
+`Delete Entry`. An unspecified Instance ID is treated the same as
+an empty string. Deleting a nonexistent entry returns error 10.
+
+Unconfigured:
+```
+  <Step enable="True" id="238" name="Configure Persistent Data">
+    <Option state="False"/>
+  </Step>
+```
+
+Set mode (round-trip verified):
+```
+  <Step enable="True" id="238" name="Configure Persistent Data">
+    <Option state="False"/>
+    <Value>
+      <Calculation><![CDATA[value expression]]></Calculation>
+    </Value>
+    <InstanceId>
+      <Calculation><![CDATA["instance id"]]></Calculation>
+    </InstanceId>
+    <Name>"entry name"</Name>
+  </Step>
+```
+
+Delete mode (round-trip verified):
+```
+  <Step enable="True" id="238" name="Configure Persistent Data">
+    <Option state="True"/>
+    <InstanceId>
+      <Calculation><![CDATA["instance id"]]></Calculation>
+    </InstanceId>
+    <Name>"entry name"</Name>
+  </Step>
+```
+
+Notes:
+- `<Option state="False"/>` = Set. `<Option state="True"/>` = Delete.
+- **`<Name>` is plain text, not a Calculation wrapper.** Content
+  includes literal quotes when a quoted string is entered. This is an
+  inconsistency: `<Value>` and `<InstanceId>` both use
+  `<Calculation><![CDATA[...]]></Calculation>` but `<Name>` does not.
+  Generators must emit `<Name>` as plain text, not CDATA-wrapped.
+  This may be a silent-failure trap.
+- Element order (Set): `Option` → `Value` → `InstanceId` → `Name`.
+- Element order (Delete): `Option` → `InstanceId` → `Name`.
 
 ---
 
@@ -112,15 +167,66 @@ AI steps carry a distinctive sub-element naming the AI operation type
 skeletons show this sub-element in its empty form.
 
 #### Configure AI Account (212)
+
+`<LLMType>` enumeration (all round-trip verified):
+
+| Provider | LLMType value |
+|---|---|
+| OpenAI | `ChatGPT` |
+| Anthropic | `Anthropic` |
+| Cohere | `Cohere` |
+| Google Gemini | `Google` |
+| Custom | `Other` |
+
+Unconfigured:
 ```
   <Step enable="True" id="212" name="Configure AI Account">
     <LLMType value="ChatGPT"/>
-    <SetLLMAccout/>
+    <SetLLMAccount/>
   </Step>
 ```
 
-The element name `SetLLMAccout` is FileMaker's own output (missing the
-`n` in `Account`). See Appendix B.
+Predefined providers (round-trip verified):
+```
+  <Step enable="True" id="212" name="Configure AI Account">
+    <LLMType value="ChatGPT"/>
+    <SetLLMAccount>
+      <AccountName>
+        <Calculation><![CDATA["account name"]]></Calculation>
+      </AccountName>
+      <AccessAPIKey>
+        <Calculation><![CDATA["api key"]]></Calculation>
+      </AccessAPIKey>
+    </SetLLMAccount>
+  </Step>
+```
+
+Custom provider (round-trip verified):
+```
+  <Step enable="True" id="212" name="Configure AI Account">
+    <VerifySSLCertificates state="False"/>
+    <LLMType value="Other"/>
+    <SetLLMAccount>
+      <AccountName>
+        <Calculation><![CDATA["account name"]]></Calculation>
+      </AccountName>
+      <Endpoint>
+        <Calculation><![CDATA["https://server.example.com/llm/v1/"]]></Calculation>
+      </Endpoint>
+      <AccessAPIKey>
+        <Calculation><![CDATA["api key"]]></Calculation>
+      </AccessAPIKey>
+    </SetLLMAccount>
+  </Step>
+```
+
+Custom adds `<VerifySSLCertificates>` as a direct Step child before
+`<LLMType>`, and `<Endpoint>` inside `<SetLLMAccount>` between
+`AccountName` and `AccessAPIKey`.
+
+Note: FM 26 corrected the inner element spelling from `SetLLMAccout`
+(FM 2025) to `SetLLMAccount`. See Appendix B. Generators targeting
+FM 26 should use the corrected spelling.
 
 #### Configure Machine Learning Model (202)
 ```
@@ -255,6 +361,42 @@ in FileMaker's native output. See Appendix B.
   </Step>
 ```
 
+#### Insert Image Caption (241)
+
+Sends an image to a captioning model and inserts the returned text
+into a field or variable. Claris AI Model Server only.
+
+Options: `Account Name`, `Model`, `Input` (expression returning
+container data), `Target` (field or variable, required).
+
+```
+  <Step enable="True" id="241" name="Insert Image Caption">
+    <LLMEmbedding/>
+  </Step>
+```
+
+Reuses the `<LLMEmbedding/>` inner element from Insert Embedding (215).
+
+#### Insert Image Captions in Found Set (240)
+
+Batch version: for every record in the found set, sends an image
+from a source field to a captioning model and inserts the caption
+into a target field. Claris AI Model Server only.
+
+Options: `Account Name`, `Model`, `Source Field` (container),
+`Target Field` (text), `Replace target contents`,
+`Continue on error`, `Parameters` (JSON with `MaxRecPerCall`
+default 20, range 1-500).
+
+```
+  <Step enable="True" id="240" name="Insert Image Captions in Found Set">
+    <LLMBulkEmbedding/>
+  </Step>
+```
+
+Reuses the `<LLMBulkEmbedding/>` inner element from Insert Embedding
+in Found Set (216).
+
 ---
 
 ### 8.12 Spelling
@@ -345,6 +487,7 @@ including any spacing):
 | Beep | 93 |
 | Exit Application | 44 |
 | Flush Cache to Disk | 102 |
+| Flush Web Viewer Cookies | 237 |
 | Install Plug-In File | 157 |
 | Refresh Portal | 180 |
 | Set Session Identifier | 208 |
@@ -576,11 +719,50 @@ FileMaker's canonical output. The `<URL>` element wraps a
 ```
 
 Configured steps emit children in fixed order: optional `<Title>` →
-`<Message>` → `<Buttons>`. `<Title>` and `<Message>` each wrap a
-`<Calculation>`. `<Buttons>` always contains exactly three `<Button>`
-slots — unused slots are self-closing. `CommitState="True"` on a
-button indicates that the button commits the pending record; it is
-not a "default button" indicator.
+`<Message>` → optional `<Height>` → `<Width>` → `<DistanceFromTop>` →
+`<DistanceFromLeft>` → `<Buttons>`. `<Title>` and `<Message>` each
+wrap a `<Calculation>`. `<Buttons>` always contains exactly three
+`<Button>` slots — unused slots are self-closing.
+`CommitState="True"` on a button indicates that the button commits
+the pending record; it is not a "default button" indicator.
+
+**FM 26: Size and position** (round-trip verified). `<Height>`,
+`<Width>`, `<DistanceFromTop>`, and `<DistanceFromLeft>` are optional
+calculation elements specifying dialog size and position in points.
+They sit between `<Message>` and `<Buttons>`. All are optional —
+unspecified values use defaults. FileMaker Go does not support size
+and position.
+```
+  <Step enable="True" id="87" name="Show Custom Dialog">
+    <Title>
+      <Calculation><![CDATA["Dialog Title"]]></Calculation>
+    </Title>
+    <Message>
+      <Calculation><![CDATA["Message text"]]></Calculation>
+    </Message>
+    <Height>
+      <Calculation><![CDATA[200]]></Calculation>
+    </Height>
+    <Width>
+      <Calculation><![CDATA[400]]></Calculation>
+    </Width>
+    <DistanceFromTop>
+      <Calculation><![CDATA[100]]></Calculation>
+    </DistanceFromTop>
+    <DistanceFromLeft>
+      <Calculation><![CDATA[100]]></Calculation>
+    </DistanceFromLeft>
+    <Buttons>
+      <Button CommitState="True">
+        <Calculation><![CDATA["OK"]]></Calculation>
+      </Button>
+      <Button CommitState="False">
+        <Calculation><![CDATA["Cancel"]]></Calculation>
+      </Button>
+      <Button CommitState="False"/>
+    </Buttons>
+  </Step>
+```
 
 **Single OK (alert) — OK commits:**
 ```

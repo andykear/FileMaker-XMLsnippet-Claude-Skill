@@ -1,5 +1,8 @@
 # Canonical XML Format for FileMaker Script Steps
 
+Part of the FileMaker Script XML Skill, v1.12.
+Verified against FileMaker Pro 2026 on macOS.
+
 **Author:** Andrew Kear, Clockwork Creative Technology
 **Version:** 1.11
 **Date:** June 2026
@@ -348,6 +351,22 @@ post-paste verification of referenced objects.
 
 ## 6. Conditional elements
 
+### 6.0 FM 26 universal elements
+
+**DisableStepCollapsed.** FileMaker 2026 adds
+`<DisableStepCollapsed state="False"/>` to every step in native Copy
+output. This supports the collapsible disabled-block feature in the
+Script Workspace. The element is not required for paste — FM 26
+accepts XML without it and adds it on re-export. Generators may omit
+it. The skeletons in this spec omit it for clarity.
+
+**Window UUID selection.** Close Window (121), Select Window (123),
+Move/Resize Window (119), and Set Window Title (124) now accept a
+UUID in the `<Name>` calculation as well as a window name. At
+runtime, FM searches by name first, then falls back to UUID matching.
+The XML format is unchanged: `<Window value="ByName"/>` with `<Name>`
+containing a `<Calculation>` child. No structural change.
+
 Minimal skeletons in the step reference below show what FileMaker emits
 for an unconfigured or default step. Additional child elements appear
 only when the corresponding option is configured. Common examples:
@@ -556,16 +575,33 @@ The following irregularities appear in FileMaker's own Copy output and
 must be preserved verbatim in generated XML. They are FileMaker's
 behaviour, not errors in this document.
 
-### B.1 Configure AI Account — misspelled element
+### B.1 Configure AI Account — misspelled element (FM 2025 only)
 
-Step 212 emits `<SetLLMAccout/>` as its sub-element. The correct
-spelling would be `SetLLMAccount`. The misspelled form is FileMaker's
-native output and must be used for paste compatibility.
+Step 212 emitted `<SetLLMAccout/>` in FM 2025 (missing the `n` in
+`Account`). FM 26 corrected this to `<SetLLMAccount/>`. Generators
+targeting FM 26 should use the corrected spelling. Generators
+targeting FM 2025 should use the misspelled form.
 
 ### B.2 Configure RAG Account — trailing space in step name
 
 Step 227 emits `name="Configure RAG Account "` with a trailing space
 inside the attribute value. The trailing space is part of FileMaker's
 native output and must be preserved.
+
+---
+
+## Appendix C: FM 26 PDF error codes
+
+| Code | Meaning | Steps |
+|------|---------|-------|
+| 605 | Container field is empty | Print PDF |
+| 606 | Container data is not a PDF | Print PDF |
+| 607 | Password missing or incorrect for encrypted PDF | Print PDF |
+| 608 | PDF security settings prevent printing | Print PDF |
+| 829 | No PDF file is open to append to | Append PDF |
+| 830 | PDF file not found or invalid format | Open PDF |
+| 831 | Invalid PDF password | Open PDF, Append PDF |
+| 832 | PDF security settings prevent modification | Open PDF |
+| 833 | PDF file is already opened | Create PDF, Open PDF |
 
 ---

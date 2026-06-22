@@ -1,6 +1,6 @@
 # Custom Functions (§11)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.11.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
 Read `core.md` first.
 
 ## 11. Custom Functions

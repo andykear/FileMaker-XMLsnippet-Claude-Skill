@@ -1,6 +1,6 @@
 # Step Reference — Plugin Steps (§9)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.11.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
