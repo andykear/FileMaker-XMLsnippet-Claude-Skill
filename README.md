@@ -110,17 +110,19 @@ The Script Workspace accepts `fmxmlsnippet type="FMObjectList"` via clipboard pa
 
 ---
 
-## Companion projects
+## Companion repos
 
-This skill covers Script objects. Companion skills cover the other paste targets:
+Five open-source resources for the FileMaker/Claris community:
+
+[FileMaker Script XML Skill](https://github.com/andykear/FileMaker-XMLsnippet-Claude-Skill) — script steps for the Script Workspace
 
 [FileMaker Layout XML Skill](https://github.com/andykear/FileMaker-XMLsnippet-Layout-Claude-Skill) — layout objects for Layout mode
 
 [FileMaker Field Definitions XML Skill](https://github.com/andykear/FileMaker-XML-field-definitions) — field definitions for Manage Database
 
-[FileMaker XML Inspector](https://github.com/andykear/FileMaker-XML-inspector-open-source) — browser-based Save as XML analyser. Single file, nothing uploaded, nothing leaves the browser.
+[FileMaker XML Inspector](https://github.com/andykear/FileMaker-XML-inspector-open-source) — browser-based Save as XML analyser
 
-[FileMaker XML Scrubber](https://github.com/andykear/FileMaker-XML-scrubber) — redacts credentials from FileMaker XML exports before sharing with AI tools.
+[FileMaker XML Scrubber](https://github.com/andykear/FileMaker-XML-scrubber) — redacts credentials before sharing with AI tools
 
 ---
 
