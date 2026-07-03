@@ -1,6 +1,6 @@
 # Step Reference — Plugin Steps (§9)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -99,5 +99,14 @@ when MBS *is* installed has not been verified — the structural form
 is preserved either way, but the step's resolution to a working MBS
 function is conditional on the plugin's presence and registration
 state.
+
+**The placeholder strips content, not just the name.** Pasting a full
+MBS step into a file without the plugin and copying it back out shows
+the entire body collapsed — `<PluginStep>` and `<Field>` are gone
+entirely, `<ParameterValues>` is emptied to a bare self-closing
+element. Only `Source`, `index`, and the placeholder name survive.
+Also the one exception to the FM 2026 `DisableStepCollapsed` element
+(core.md §6.0) — every other step type receives it, this placeholder
+does not.
 
 ---

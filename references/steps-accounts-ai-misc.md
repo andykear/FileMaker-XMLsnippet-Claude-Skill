@@ -1,6 +1,6 @@
 # Step Reference — Configure, Accounts, AI, Spelling, Menus, Miscellaneous (§8.2, §8.10–8.14)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -111,6 +111,36 @@ including any spacing):
     </AddAccount>
   </Step>
 ```
+
+**Not save-valid as documented above** — no account name, password,
+or privilege set. Starting skeleton only.
+
+Configured (privilege set is one of the three FileMaker built-ins,
+round-trip verified):
+```
+  <Step enable="True" id="134" name="Add Account">
+    <ChgPwdOnNextLogin value="False"/>
+    <AccountName>
+      <Calculation><![CDATA["account name"]]></Calculation>
+    </AccountName>
+    <Password>
+      <Calculation><![CDATA["password"]]></Calculation>
+    </Password>
+    <PrivilegeSet id="1" name="[Data Entry Only]"/>
+    <AddAccount>
+      <AccountType>FileMaker</AccountType>
+    </AddAccount>
+  </Step>
+```
+Element order: `ChgPwdOnNextLogin` → `AccountName` → `Password` →
+`PrivilegeSet` → `AddAccount`. `AccountName`/`Password` use the same
+Calculation/CDATA wrapper as Re-Login's account fields (below).
+FileMaker's three built-in privilege sets — `[Full Access]`,
+`[Data Entry Only]`, `[Read-Only Access]` — are referenced by name
+**including the literal square brackets**, and resolve in any file
+since they're FileMaker constants rather than solution schema. Custom
+privilege sets likely still need the usual placeholder-ID caveat
+(core.md §5, "Runtime dependencies not enforced by the XML format").
 
 #### Change Password (83)
 ```
@@ -231,9 +261,15 @@ FM 26 should use the corrected spelling.
 #### Configure Machine Learning Model (202)
 ```
   <Step enable="True" id="202" name="Configure Machine Learning Model">
-    <ConfigureCoreML>Uninstall</ConfigureCoreML>
+    <ConfigureCoreML>
+      <Operation>Uninstall</Operation>
+    </ConfigureCoreML>
   </Step>
 ```
+
+**The value is wrapped in a nested `<Operation>` element, not held as
+plain text.** `<ConfigureCoreML>Uninstall</ConfigureCoreML>` (bare
+text) does not match native output — use the nested form above.
 
 #### Configure Prompt Template (226)
 ```
@@ -279,6 +315,21 @@ in FileMaker's native output. See Appendix B.
   </Step>
 ```
 
+**Not save-valid as documented above** — `<Table id="0" name=""/>` is
+a genuine export state, but FileMaker won't save it unset this way.
+
+Configured, `<Table>` pointing at a real table occurrence:
+```
+  <Step enable="True" id="213" name="Fine-Tune Model">
+    <Option state="False"/>
+    <UniversalPathList type="Embedded"/>
+    <Table id="1" name="table occurrence name"/>
+    <FineTuneLLM>
+      <DataSource>DataTable</DataSource>
+    </FineTuneLLM>
+  </Step>
+```
+
 #### Generate Response from Model (220)
 ```
   <Step enable="True" id="220" name="Generate Response from Model">
@@ -296,6 +347,7 @@ in FileMaker's native output. See Appendix B.
 #### Insert Embedding (215)
 ```
   <Step enable="True" id="215" name="Insert Embedding">
+    <Option state="False"/>
     <LLMEmbedding/>
   </Step>
 ```
@@ -321,6 +373,8 @@ in FileMaker's native output. See Appendix B.
 #### Perform RAG Action (219)
 ```
   <Step enable="True" id="219" name="Perform RAG Action">
+    <DetectVertical state="False"/>
+    <RAGSpaceTokensPerTextChunk state="False"/>
     <RAGSpace>
       <RAGSpaceAction>Add</RAGSpaceAction>
       <DataSource>FromText</DataSource>
@@ -331,6 +385,7 @@ in FileMaker's native output. See Appendix B.
 #### Perform Semantic Find (218)
 ```
   <Step enable="True" id="218" name="Perform Semantic Find">
+    <UniversalPathList type="Embedded"/>
     <LLMSemanticFind>
       <Query type="1"/>
       <Records type="1"/>

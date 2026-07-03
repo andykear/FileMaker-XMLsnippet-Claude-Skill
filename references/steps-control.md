@@ -1,6 +1,6 @@
 # Step Reference — Control (§8.1)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -131,6 +131,15 @@ This is a verified silent-failure mode similar to the Set Variable
   </Step>
 ```
 
+**Structural rule, not a skeleton issue — see core.md §8.1.** Both
+`Commit Transaction` (206) and `Revert Transaction` (207) above are
+individually correct as documented, but neither one is save-valid if
+nested inside an `If`/`Else`/`End If` block, with or without `Open
+Transaction` present. This is a common pattern for a conditional
+commit-or-revert and it fails at save time, not paste time. Read
+core.md §8.1 before generating a script that branches to a commit or
+revert.
+
 #### Set Revert Transaction on Error (223)
 ```
   <Step enable="True" id="223" name="Set Revert Transaction on Error">
@@ -171,6 +180,30 @@ With parameter:
     <CallbackScript/>
   </Step>
 ```
+
+**Not save-valid as documented above** — no reference for either the
+main script or the callback, and live save-testing confirms
+FileMaker won't save the file left this way. Use as a starting
+skeleton only.
+
+Configured (both the main script and the callback pointed at the same
+script, round-trip verified):
+```
+  <Step enable="True" id="210" name="Perform Script on Server with Callback">
+    <CallbackScriptState value="Continue"/>
+    <Script id="1" name="script name"/>
+    <CallbackScript>
+      <ScriptName id="1" name="script name"/>
+    </CallbackScript>
+  </Step>
+```
+
+**Naming asymmetry — easy to get wrong.** The two script references
+use different element names for what looks like the same kind of
+reference. The main script is a bare `<Script id name>` sibling of
+`<CallbackScriptState>`. The callback's reference is `<ScriptName id
+name>`, nested inside `<CallbackScript>`, not `<Script>`. Do not
+assume both slots take the same tag.
 
 #### Set Error Capture (86)
 ```
@@ -239,6 +272,11 @@ production scripts. Round-trip verified: a blank `# ` line in the
 Script Workspace emits as the self-closing form on Copy, and an
 empty `<Text/>` body is not the equivalent — generators should emit
 the self-closing form for divider lines.
+
+**FM 2026 addition:** native Copy output for every Comment step,
+including the bare divider form, also includes
+`<Restore state="False"/>`. Like `DisableStepCollapsed` (core.md
+§6.0), not required for paste — generators may omit it.
 
 ---
 

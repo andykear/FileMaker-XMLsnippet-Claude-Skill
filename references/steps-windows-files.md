@@ -1,6 +1,6 @@
 # Step Reference — Windows and Files (§8.8–8.9)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -228,6 +228,23 @@ including any spacing):
   </Step>
 ```
 
+**Not save-valid as documented above** — no file reference at all.
+
+Configured, pointing at a file (self-referential example shown):
+```
+  <Step enable="True" id="33" name="Open File">
+    <Option state="False"/>
+    <FileReference id="1" name="file name">
+      <UniversalPathList>file:target.fmp12</UniversalPathList>
+    </FileReference>
+  </Step>
+```
+`<FileReference>` wraps `id`/`name` attributes plus a
+`<UniversalPathList>` child using the `file:` prefix scheme.
+**Different pattern from Save a Copy as XML's destination below** —
+that one uses a bare `<UniversalPathList>`, no wrapper. Don't assume
+both file-destination steps match.
+
 #### Print (43)
 ```
   <Step enable="True" id="43" name="Print">
@@ -283,6 +300,7 @@ FM 26 expanded (from native Copy output):
     <Option state="False"/>
     <OutputEntireBinaryData state="False"/>
     <SpecifyJSONOptions state="False"/>
+    <UniversalPathList>file:destination.xml</UniversalPathList>
     <SaXML>
       <JSONOptions>
         <Calculation><![CDATA[JSONSetElement ( "{}" ;
@@ -317,11 +335,17 @@ FM 26 expanded (from native Copy output):
   </Step>
 ```
 
+**Not save-valid without the destination path** — neither form above
+has anywhere to save to. `<UniversalPathList>` is a bare `<Step>`
+child here, not wrapped in `<FileReference>` like Open File above,
+using the `file:` prefix scheme.
+
 FM 26 new elements:
 - `<OutputEntireBinaryData>` — include full binary data for layout
   objects.
-- `<SpecifyJSONOptions>` — whether JSON catalog selection is
-  configured.
+- `<SpecifyJSONOptions>` — **`<SaXML>` is emitted unconditionally,
+  regardless of this flag's value.** Don't treat this flag as
+  controlling whether `<SaXML>` appears.
 - `<SaXML>` → `<JSONOptions>` → `<Calculation>` — catalog
   configuration as a JSONSetElement expression.
 

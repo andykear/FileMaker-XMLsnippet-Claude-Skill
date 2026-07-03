@@ -1,6 +1,6 @@
 # Step Reference — Navigation and Editing (§8.3–8.4)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -75,6 +75,13 @@ With a specific layout:
     <Layout id="N" name="layout name"/>
   </Step>
 ```
+
+**False lead, recorded to prevent rediscovery.** Using a name that
+matches an existing table occurrence (rather than an actual layout
+name) resolved and saved correctly in one test file — but only
+because that specific file happened to already have a layout with a
+matching name. Not a general guarantee about how `<Layout>` resolves;
+`name` still needs to match a real layout in the target file.
 
 #### Go to List of Records (228)
 ```
@@ -221,6 +228,14 @@ state:
     <Table id="0" name=""/>
   </Step>
 ```
+
+**This is a real, genuine export state — not a valid generation
+template.** It's what an actual unconfigured GTRR step looks like when
+copied natively, useful as a reference for recognizing one, but a
+step generated in this shape does not save. Use the Basic form above
+for anything actually meant to be pasted and used; this one is
+documentation of what "not yet set up" looks like, not something to
+generate on purpose.
 
 ---
 

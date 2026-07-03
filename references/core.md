@@ -1,12 +1,10 @@
 # Canonical XML Format for FileMaker Script Steps
 
-Part of the FileMaker Script XML Skill, v1.12.
-Verified against FileMaker Pro 2026 on macOS.
-
 **Author:** Andrew Kear, Clockwork Creative Technology
-**Version:** 1.11
-**Date:** June 2026
-**Verified against:** FileMaker Pro 2025 on macOS
+**Version:** 1.13
+**Date:** July 2026
+**Verified against:** FileMaker Pro 2026 on macOS. Where a rule is
+FM 2025-specific, it's flagged inline (see Appendix B).
 **Licence:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
 — free to use, share, and adapt with attribution.
 
@@ -360,6 +358,12 @@ Script Workspace. The element is not required for paste — FM 26
 accepts XML without it and adds it on re-export. Generators may omit
 it. The skeletons in this spec omit it for clarity.
 
+**One exception: MBS (186) does not receive it** — when it pastes as
+a missing-plugin placeholder (see steps-plugin.md), the whole step
+body collapses along with the name, consistent with FileMaker not
+treating the placeholder as a recognised step. Position among a
+step's other children has no discoverable rule — see Appendix A.2.
+
 **Window UUID selection.** Close Window (121), Select Window (123),
 Move/Resize Window (119), and Set Window Title (124) now accept a
 UUID in the `<Name>` calculation as well as a window name. At
@@ -527,6 +531,29 @@ expected before treating the structure as verified. For tags affected
 by Section 7.4, additionally verify the byte-level form of the
 generated XML against the literal byte sequence, not the rendered
 display.
+
+## 8. Known save-time rejections
+
+Different from Section 7: those paste clean and produce silently
+broken steps, found by round-trip diffing. A save-time rejection
+pastes and round-trips byte-identical, then FileMaker refuses to save
+the file — invisible to diffing, found only by testing an actual save.
+
+### 8.1 Commit Transaction / Revert Transaction cannot be nested inside If/Else
+
+**Trigger:** `Commit Transaction` (206) or `Revert Transaction` (207)
+inside an `If`/`Else`/`End If` block, with or without `Open
+Transaction` (205) present.
+
+**Symptom:** File fails to save. No content diff — the XML itself is
+unchanged.
+
+**Fix:** Keep both steps flat and unconditional. Branch to a flat
+commit or a flat revert rather than nesting either inside the branch.
+This is the natural way to write a conditional commit/revert, so a
+generator producing that idiom will hit this every time unless it
+flattens the structure first.
+
 ## Appendix A: Open observations
 
 ### A.1 NewWndStyles bit values and extended attributes
@@ -566,6 +593,15 @@ following have been observed in configured steps:
 These optional attributes appear when the corresponding options are
 configured in the step's dialog. Their relationship to the numeric
 `Styles` value is not yet mapped.
+
+### A.2 DisableStepCollapsed position has no discoverable rule
+
+No positional rule found across roughly 30 tested step shapes —
+sometimes first, sometimes after existing flags, sometimes
+interspersed between them (e.g. `Open Transaction` has three flags
+before it, one after). Since Section 6.0 already permits omitting the
+element entirely, this only matters for byte-exact native matching —
+treat position as a per-step lookup, like A.1, not a formula.
 
 ---
 

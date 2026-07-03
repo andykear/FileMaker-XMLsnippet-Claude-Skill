@@ -1,6 +1,6 @@
 # Step Reference — Fields, Records and Found Sets (§8.5–8.7)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -557,6 +557,20 @@ escaped inside `<Text>`: `>` becomes `&gt;`, `<` becomes `&lt;`,
 `&` becomes `&amp;`. For example, `>=$earliest_date` is encoded as
 `&gt;=$earliest_date`.
 
+**Silent-drop warning, applies equally to Constrain Found Set above.**
+If any `<Field>` inside `<Criteria>` does not resolve in the target
+file, FileMaker does not fail gracefully the way it does for an
+ordinary field target elsewhere (e.g. Set Field, which just blanks
+the field reference and leaves the step visibly incomplete). Instead
+the **entire `<RequestRow>` is silently emptied and its `operation`
+attribute flips from `Include` to `Exclude`** — a step written to
+find matching records silently becomes one that excludes based on no
+criteria at all, with nothing in the resulting XML to show anything
+went wrong. A generator producing saved find or constrain criteria
+without live access to the target file's schema should flag the
+result for manual verification — a clean-looking paste here does not
+mean the step does what it looks like it does.
+
 #### Sort Records (39)
 ```
   <Step enable="True" id="39" name="Sort Records">
@@ -574,7 +588,7 @@ in priority order.
   <Step enable="True" id="39" name="Sort Records">
     <NoInteract state="True"/>
     <Restore state="True"/>
-    <SortList Maintain="True" value="True">
+    <SortList BlanksLast="False" Maintain="True" value="True">
       <Sort type="Ascending">
         <PrimaryField>
           <Field table="TableOccurrence" id="N" name="field_a"/>
@@ -591,6 +605,8 @@ in priority order.
 
 `<SortList>` attributes:
 
+- `BlanksLast="True|False"` — controls whether blank values sort
+  last regardless of sort direction.
 - `Maintain="True|False"` — corresponds to "Keep records in sorted
   order" in the dialog
 - `value="True"` — meaning not yet established; observed as `True` in

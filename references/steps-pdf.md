@@ -1,6 +1,6 @@
 # Step Reference — PDF Files (§8.15)
 
-Part of the Canonical XML Format for FileMaker Script Steps, v1.12.
+Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
 
@@ -93,7 +93,7 @@ Configured with Specify options (round-trip verified):
 
 Notes:
 - `<Restore state="True"/>` when Specify options is configured.
-- Bare `<Calculation>` between `<Restore>` and `<CreatePDFFile>` — appears when Restore is True. Purpose not confirmed; observed in both Create PDF and Save Records as PDF.
+- **Bare `<Calculation>` between `<Restore>` and `<CreatePDFFile>` — this is the Title, mirrored, not an independent setting.** Confirmed by two deliberately opposed isolation tests: (1) the bare slot set to one value and `<Title>` set to a different value — both came back matching Title's value on round trip, the bare slot was overwritten; (2) the bare slot set to a value with `<Title>` omitted entirely — FileMaker synthesized a `<Title>` element populated with the bare slot's value. Same mechanism from both directions. Set the bare `<Calculation>` to the same content as `<Title>` — never leave it as an arbitrary placeholder, since which one wins when they differ isn't something to rely on. Confirmed for Create PDF via both tests; Save Records as PDF showed the identical pattern in a general round trip but hasn't had its own dedicated opposed-pair test.
 - `<PageRange>` drops out when `AllPages="True"` with Restore configured.
 - `<CreatePDFFile>` wraps the same Document/Security/View structure as `<PDFOptions>` in Save Records as PDF.
 - `controlEditing` values: `AnyExceptExtractingPages`, `InsertingDeletingRotatingPages`.
