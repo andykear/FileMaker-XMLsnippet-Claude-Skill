@@ -45,18 +45,6 @@ The specification is packaged here as a Claude skill, but the format rules are m
 
 ---
 
-## FM 26 support (v1.12)
-
-v1.12 adds full FileMaker Pro 2026 support with 10 new steps and updates to existing steps, all round-trip verified:
-
-**New steps:** PDF Files category (Create PDF, Open PDF, Append PDF, Print PDF, Close PDF, Cancel PDF), Configure Persistent Data, Insert Image Caption, Insert Image Captions in Found Set, Flush Web Viewer Cache.
-
-**Updated steps:** Save Records as PDF (three PDFSaveType modes, source and appearance enumerations), Show Custom Dialog (size and position calculations), Configure AI Account (all five provider variants: OpenAI, Anthropic, Google, xAI, Groq).
-
-**New in FM 26:** DisableStepCollapsed universal element documented. Error codes 605-608 and 829-833. 16 Open menu steps added to the routing index.
-
----
-
 ## What's in the box
 
 ```
@@ -82,6 +70,8 @@ references/
 1. Download the zip from the [Releases](../../releases) page
 2. Extract to get `SKILL.md` and the `references/` folder
 3. Upload to your Claude organisation's skills library, preserving the folder structure
+
+Upgrading from v1.12: replace all files. No new files this release, all changes are within the existing file set.
 
 Upgrading from v1.11: replace all files. The `references/steps-pdf.md` file is new; all other files are updated in place.
 
@@ -110,19 +100,17 @@ The Script Workspace accepts `fmxmlsnippet type="FMObjectList"` via clipboard pa
 
 ---
 
-## Companion repos
+## Companion projects
 
-Five open-source resources for the FileMaker/Claris community:
-
-[FileMaker Script XML Skill](https://github.com/andykear/FileMaker-XMLsnippet-Claude-Skill) — script steps for the Script Workspace
+This skill covers Script objects. Companion skills cover the other paste targets:
 
 [FileMaker Layout XML Skill](https://github.com/andykear/FileMaker-XMLsnippet-Layout-Claude-Skill) — layout objects for Layout mode
 
 [FileMaker Field Definitions XML Skill](https://github.com/andykear/FileMaker-XML-field-definitions) — field definitions for Manage Database
 
-[FileMaker XML Inspector](https://github.com/andykear/FileMaker-XML-inspector-open-source) — browser-based Save as XML analyser
+[FileMaker XML Inspector](https://github.com/andykear/FileMaker-XML-inspector-open-source) — browser-based Save as XML analyser. Single file, nothing uploaded, nothing leaves the browser.
 
-[FileMaker XML Scrubber](https://github.com/andykear/FileMaker-XML-scrubber) — redacts credentials before sharing with AI tools
+[FileMaker XML Scrubber](https://github.com/andykear/FileMaker-XML-scrubber) — redacts credentials from FileMaker XML exports before sharing with AI tools.
 
 ---
 
@@ -142,6 +130,7 @@ Found a step that doesn't round-trip? Native export that contradicts the spec? O
 
 | Version | Notes |
 |---------|-------|
+| 1.13 | Continued FM 26 verification. Configured forms added for five steps previously documented only as unconfigured placeholders: Add Account, Open File, Perform Script on Server with Callback, Fine-Tune Model, Save a Copy as XML (destination path). One structural correction: Configure Machine Learning Model's ConfigureCoreML value. New elements confirmed on DisableStepCollapsed's one exception, Comment, three AI-section steps, and Sort Records. Resolved the long-standing Create PDF/Save Records as PDF bare-Calculation question (mirrors Title). New structural rule: Commit/Revert Transaction cannot nest inside If/Else. Thanks to Darrin Southern of CadenceUX for sharing a number of excellent additions in this point release. |
 | 1.12 | FM 26 (FileMaker Pro 2026) support. 10 new steps: PDF Files category (Create PDF, Open PDF, Append PDF, Print PDF, Close PDF, Cancel PDF), Configure Persistent Data, Insert Image Caption, Insert Image Captions in Found Set, Flush Web Viewer Cache. Updated steps: Save Records as PDF, Show Custom Dialog, Configure AI Account. New elements: DisableStepCollapsed. Error codes 605-608, 829-833. 16 new Open menu steps. |
 | 1.11 | Progressive loading restructure: spec split into core rules plus on-demand step category files with a routing index. Simple tasks load around 55% fewer reference tokens than v1.10, typical tasks 30-35% fewer. All steps remain fully documented. |
 | 1.10.4 | Added support for custom functions. Fixes an installation path issue affecting all previous versions. |

@@ -31,7 +31,7 @@ handler actually accepts.
 
 ## Mandatory reading — progressive loading
 
-The specification (v1.12) is split so a task loads only the sections it
+The specification (v1.13) is split so a task loads only the sections it
 needs. The rules are:
 
 1. **Always read `references/core.md` first.** Not optional. It contains
