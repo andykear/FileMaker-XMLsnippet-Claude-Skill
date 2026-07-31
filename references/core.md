@@ -47,7 +47,7 @@ XML declaration and `fmxmlsnippet` element specified in Section 1.
 cleanly into the FileMaker Script Workspace. It documents
 canonical skeletons for every script step (~180), verified
 configured forms for the steps most commonly used in real
-automation, and three known silent-failure modes.
+automation, and five known silent-failure modes.
 
 **This document does not cover:** layout objects, theme XML,
 FileMaker's full DDR (Database Design Report) format, runtime
@@ -387,7 +387,7 @@ only when the corresponding option is configured. Common examples:
 
 ## 7. Known silent-failure modes
 
-These three patterns paste without error in FileMaker but produce
+These five patterns paste without error in FileMaker but produce
 broken steps. They are the primary reason this specification exists.
 Each was discovered by round-trip testing — the failure mode is not
 visible from the XML alone.
@@ -431,7 +431,8 @@ timer interval is unset and the timer never fires at the intended
 rate.
 
 **Fix:** Wrap the interval in an `<Interval>` element containing the
-`<Calculation>` child. See Section 8.1 for the verified structure.
+`<Calculation>` child. See `steps-control.md`'s Install OnTimer Script
+(148) entry for the verified structure.
 
 ### 7.4 Spec-rendering corruption of the canonical Name tag
 
@@ -500,7 +501,7 @@ Section 8.8 (New Window name; Close Window By Name window name).
 Each of those sections must be read with this rendering trap in mind.
 
 **Why this is in Section 7 rather than a separate appendix.** The
-other three failure modes in this section produce structurally valid
+other four failure modes in this section produce structurally valid
 XML that pastes with silent content drops. So does this one. The fact
 that the cause is a rendering layer rather than FileMaker's paste
 handler is irrelevant from the generator's perspective: the symptom,
@@ -508,7 +509,33 @@ the diagnostic, and the fix posture are identical. Round-trip every
 new step type that uses this tag before treating its structure as
 verified.
 
-### Pattern across all four
+### 7.5 Perform Script cross-file reference omitted (`<unknown>`)
+
+**Trigger:** Perform Script (id 1) emitted with the same-file skeleton
+(bare `<Script id name>`, no `<FileReference>`) when the target script
+actually lives in a different file than the one being pasted into.
+
+**Symptom:** Step pastes successfully but displays as
+`Perform Script [<unknown>]` — a full resolution failure, not the
+"missing reference" indicator described in Section 5 for a nonexistent ID/name
+(that case still resolves by name and pastes cleanly; this one doesn't
+resolve at all, even though the target script genuinely exists, because
+the paste handler has no file to look for it in).
+
+**Fix:** Emit a `<FileReference id="N" name="target file name">`
+element, wrapping a `<UniversalPathList>file:target file name</UniversalPathList>`
+child (no `.fmp12` extension), as the first child of the `<Step>`,
+before `<Calculation>` (present only when a parameter is set) and
+`<Script>`. See `steps-control.md`'s Perform Script (1) entry for the
+verified structure — both the with-parameter and without-parameter
+forms round-trip confirmed 2026-07-31, FileMaker Pro v22.0.6.611 /
+"FileMaker Pro 2025", macOS. (Note: `<UniversalPathList>` here holds a
+bare `file:Name` value, not a real filesystem path — consistent with
+Section 5's "External data source references" bullet above, which already
+notes these steps "carry the data source name but not the file's
+location.")
+
+### Pattern across all five
 
 Each silent-failure case involves an element name or wrapper where
 the FileMaker-canonical form is shorter or less obvious than what an
