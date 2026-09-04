@@ -154,6 +154,37 @@ revert.
   </Step>
 ```
 
+With a parameter (same file):
+```
+  <Step enable="True" id="1" name="Perform Script">
+    <Calculation><![CDATA[parameter expression]]></Calculation>
+    <Script id="N" name="script name"/>
+  </Step>
+```
+
+**Cross-file (verified 2026-07-31 via round-trip Copy from FileMaker Pro v22.0.6.611 / "FileMaker Pro 2025", macOS).** When the target script lives in a different file than the one being pasted into, a `<FileReference>` element appears as the **first** child, before `<Calculation>`/`<Script>`:
+```
+  <Step enable="True" id="1" name="Perform Script">
+    <FileReference id="N" name="target file name">
+      <UniversalPathList>file:target file name</UniversalPathList>
+    </FileReference>
+    <Calculation><![CDATA[parameter expression]]></Calculation>
+    <Script id="N" name="script name"/>
+  </Step>
+```
+Without a parameter, `<Calculation>` is omitted entirely (round-trip confirmed):
+```
+  <Step enable="True" id="1" name="Perform Script">
+    <FileReference id="N" name="target file name">
+      <UniversalPathList>file:target file name</UniversalPathList>
+    </FileReference>
+    <Script id="N" name="script name"/>
+  </Step>
+```
+Element order: `FileReference` → `Calculation` (present only when a parameter is set, confirmed by round-trip comparison of the with/without-parameter forms above) → `Script`. `<UniversalPathList>` uses the bare `file:TargetFileName` form with **no `.fmp12` extension** — do not confuse with the `Open File` step's own `UniversalPathList` form (`steps-windows-files.md`), which does include the extension; these are the same `file:` prefix convention used differently by two different steps.
+
+**Silent-drop warning, cross-file case.** Generating this step with the same-file skeleton above (omitting `<FileReference>`) when the target script is actually in a different file does not produce a "missing reference" indicator — it pastes as `Perform Script [<unknown>]`, a full resolution failure distinct from the graceful ID/name fallback documented in core.md §5. See core.md §7 for the general pattern this fits.
+
 #### Perform Script on Server (164)
 
 Without parameter:

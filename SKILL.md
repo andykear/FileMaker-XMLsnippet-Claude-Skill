@@ -93,7 +93,9 @@ When the user provides FileMaker XML to review:
 2. Check against the silent-failure modes (core.md §7):
    - **7.1** — `Name` element emitted as single-letter tag (Set Variable loses variable name)
    - **7.2** — compact/single-line form instead of expanded child form
-   - **7.3** — wrong element order within a `<Step>`
+   - **7.3** — Install OnTimer Script interval bound to wrong slot (interval emitted as bare `<Calculation>` instead of wrapped in `<Interval>`)
+   - **7.4** — rendering layer strips the canonical `Name` tag to a single letter before generation
+   - **7.5** — cross-file Perform Script missing `<FileReference>` (pastes as `<unknown>`)
 3. Check wrapper: must be `<?xml version="1.0" encoding="UTF-8"?>` + `<fmxmlsnippet type="FMObjectList">`.
 4. Check indentation: two spaces, no tabs.
 5. Check CDATA: all calculation content must be in `<Calculation><![CDATA[...]]></Calculation>`.
