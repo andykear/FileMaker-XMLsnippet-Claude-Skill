@@ -541,9 +541,11 @@ the file — invisible to diffing, found only by testing an actual save.
 
 ### 8.1 Commit Transaction / Revert Transaction cannot be nested inside If/Else
 
-**Trigger:** `Commit Transaction` (206) or `Revert Transaction` (207)
-inside an `If`/`Else`/`End If` block, with or without `Open
-Transaction` (205) present.
+**Trigger:** `Commit Transaction` (206) inside an `If`/`Else`/`End If` 
+block, unless the matching `Open Transaction` (205) is present within 
+the same level of conditional hierarchy prior to the 'Commit 
+Transaction' (206). By comparison, is permissible for 'Revert 
+Transaction' (207) to appear anywhere, and appear multiple times.
 
 **Symptom:** File fails to save. No content diff — the XML itself is
 unchanged.
