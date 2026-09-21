@@ -194,10 +194,18 @@ unwrapped.
 
 The following patterns recur across many step types:
 
-- `<NoInteract state="True"/>` — equivalent to "With dialog: Off" in
-  the UI for record operations, finds, exports, etc.
-- `<Option state="False"/>` — equivalent to "With dialog: Off" for
-  steps where `<NoInteract>` does not apply.
+- **A `state` attribute carries the raw stored bit, not the meaning of
+  the element's name.** Negatively named elements therefore read
+  backwards from the UI.
+- `<NoInteract state="True"/>` — "With dialog: **Off**" for record
+  operations, finds, exports, etc. "With dialog: On" is
+  `state="False"`.
+- `<Option state="True|False"/>` — a **generic** element whose meaning
+  depends on the step, and never a dialog setting. It is
+  `skipDataEntryValidation` on Commit Records/Requests, "Open file" on
+  Convert File (inverted, so `False` means open it), and the password
+  flag on Print PDF. Read it from the step's own entry; never assume it
+  across steps.
 - `<Restore state="True|False"/>` — indicates whether saved settings
   are restored (find requests, GTRR options, sort orders, print
   settings, import/export formats).

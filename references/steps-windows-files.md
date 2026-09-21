@@ -3,6 +3,8 @@
 Part of the Canonical XML Format for FileMaker Script Steps, v1.13.
 Read `core.md` first: the paste format requirements, conventions and
 silent failure modes there apply to every step below.
+In the captures below a `state` attribute is the raw stored bit, so
+`<NoInteract state="True"/>` is "With dialog: Off" (core.md §5).
 
 ### 8.8 Windows
 
@@ -213,6 +215,8 @@ including any spacing):
     <VerifySSLCertificates state="False"/>
   </Step>
 ```
+`<Option>` here is "Open file", inverted: `state="False"` leaves it **on**.
+The dialog is `<NoInteract>`, which this capture has on (`state="False"`).
 
 #### Create Data File (190)
 ```
