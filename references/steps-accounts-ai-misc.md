@@ -879,5 +879,46 @@ The clicked button is reported by `Get ( LastMessageChoice )` as
   </Step>
 ```
 
----
+#### Execute URL (224)
+```
+  <Step enable="True" id="224" name="Execute URL">
+    <DontEncodeURL state="False"/>
+    <VerifySSLCertificates state="True"/>
+    <CallbackScript/>
+  </Step>
+```
 
+**Not active in FileMaker Pro 26.0.3.** The Script Workspace renders this id as
+`#[OBSOLETE] Execute URL`, so the capture above is structural only and the step
+does not run on that build. `<DontEncodeURL>` is emitted even though it is not
+among the options the step declares. Needs re-verification on a build where the
+step is live before being relied on.
+
+#### Validate Scripts (239)
+```
+  <Step enable="True" id="239" name="Validate Scripts">
+    <Option state="False"/>
+    <Text/>
+    <Field>$result</Field>
+    <ValidateScript>
+      <AccountName>
+        <Calculation><![CDATA["acct"]]></Calculation>
+      </AccountName>
+      <Model>
+        <Calculation><![CDATA["gpt"]]></Calculation>
+      </Model>
+      <Instruction>
+        <Calculation><![CDATA["check"]]></Calculation>
+      </Instruction>
+      <Scripts/>
+    </ValidateScript>
+  </Step>
+```
+
+**Not active in FileMaker Pro 26.0.3**, same as Execute URL (224) above. The
+unconfigured step is not empty: FileMaker pre-fills `<Instruction>` with a long
+default prompt beginning "Review the following FileMaker scrips" — the
+misspelling is FileMaker's own. A generator emitting this step bare will not
+match native output unless it reproduces that default.
+
+---

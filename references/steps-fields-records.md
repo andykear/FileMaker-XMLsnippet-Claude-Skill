@@ -634,5 +634,37 @@ documented.
   <Step enable="True" id="21" name="Unsort Records"/>
 ```
 
----
+#### Replace Field Contents by Name (249)
+```
+  <Step enable="True" id="249" name="Replace Field Contents by Name">
+    <NoInteract state="True"/>
+    <Restore state="False"/>
+    <With value="None"/>
+    <SerialNumbers PerformAutoEnter="False" UpdateEntryOptions="False" increment="0" InitialValue="" UseEntryOptions="False"/>
+  </Step>
+```
 
+Configured, replacing with a calculated result:
+```
+  <Step enable="True" id="249" name="Replace Field Contents by Name">
+    <NoInteract state="True"/>
+    <Restore state="False"/>
+    <With value="Calculation"/>
+    <Calculation><![CDATA["x"]]></Calculation>
+    <TargetName>
+      <Calculation><![CDATA["test::PB_txt"]]></Calculation>
+    </TargetName>
+    <SerialNumbers PerformAutoEnter="False" UpdateEntryOptions="False" increment="0" InitialValue="" UseEntryOptions="False"/>
+  </Step>
+```
+
+**FM 2026 step.** The by-name variant of Replace Field Contents (91). The target
+is `<TargetName>` holding a calculation, where 91 takes a `<Field>` reference.
+`<With value="...">` takes `None`, `CurrentContents`, `SerialNumbers` or
+`Calculation`, and the unconfigured step emits `None`. The bare
+`<Calculation>` carrying the replacement value precedes `<TargetName>` —
+two calculation slots in one step, so §7.3 ordering care applies.
+`<SerialNumbers>` is always emitted, with its attributes at defaults, even when
+`<With>` is not `SerialNumbers`.
+
+---

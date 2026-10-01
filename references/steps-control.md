@@ -311,5 +311,42 @@ including the bare divider form, also includes
 `<Restore state="False"/>`. Like `DisableStepCollapsed` (core.md
 §6.0), not required for paste — generators may omit it.
 
----
+#### Set Script Triggers (248)
+```
+  <Step enable="True" id="248" name="Set Script Triggers"/>
+```
 
+**FM 2026 step.** The On/Off state does not appear in the snippet. Three
+instances created with the state off, off and on serialise to byte-identical
+XML, while the file itself reports them as differing (`flags` 0, 0 and 131072 —
+bit 17). The state is stored but is not carried by the clipboard, so a pasted
+step takes the default rather than the state it was copied from. Observed on
+FileMaker Pro 26.0.3; see core.md Appendix A.5.
+
+#### Set Variable by Name (250)
+```
+  <Step enable="True" id="250" name="Set Variable by Name"/>
+```
+
+Configured:
+```
+  <Step enable="True" id="250" name="Set Variable by Name">
+    <Name>
+      <Calculation><![CDATA["$v"]]></Calculation>
+    </Name>
+    <Value>
+      <Calculation><![CDATA[1]]></Calculation>
+    </Value>
+    <Repetition>
+      <Calculation><![CDATA[2]]></Calculation>
+    </Repetition>
+  </Step>
+```
+
+**FM 2026 step.** The variable name is a calculation, not the literal text
+Set Variable (141) takes — `<Name>` wraps a `<Calculation>` here in every case,
+including the simple one. The element order is `<Name>`, `<Value>`,
+`<Repetition>`, matching Set Variable. The §7.1 name-drop risk applies: emit
+`<Name>` in full expanded form.
+
+---

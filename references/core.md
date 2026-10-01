@@ -1,8 +1,8 @@
 # Canonical XML Format for FileMaker Script Steps
 
 **Author:** Andrew Kear, Clockwork Creative Technology
-**Version:** 1.13
-**Date:** July 2026
+**Version:** 2.0
+**Date:** October 2026
 **Verified against:** FileMaker Pro 2026 on macOS. Where a rule is
 FM 2025-specific, it's flagged inline (see Appendix B).
 **Licence:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
@@ -45,7 +45,8 @@ XML declaration and `fmxmlsnippet` element specified in Section 1.
 **This document covers:** the structural XML format that
 `fmxmlsnippet type="FMObjectList"` clipboards must follow to paste
 cleanly into the FileMaker Script Workspace. It documents
-canonical skeletons for every script step (~180), verified
+canonical skeletons for every script step in the FileMaker 2026
+palette — all 222 ids — verified
 configured forms for the steps most commonly used in real
 automation, and five known silent-failure modes.
 
@@ -54,7 +55,7 @@ FileMaker's full DDR (Database Design Report) format, runtime
 behaviour of any step, or what an LLM should *do* with this
 information beyond following it as a structural specification.
 
-**Verified environment:** FileMaker Pro 2025 on macOS. The same
+**Verified environment:** FileMaker Pro 2026 (26.0.3) on macOS. The same
 format is expected to work in FileMaker 19 onward and on Windows,
 but cross-version and cross-platform testing has not been performed.
 Reports of differences are welcome.
@@ -640,6 +641,40 @@ treat position as a per-step lookup, like A.1, not a formula.
 
 ---
 
+### A.3 Two serialisations of the same script clipboard
+
+Copying a script from the Script Workspace list places `«class XMSC»` on the
+pasteboard, and the same script copied twice in one session produced two
+different serialisations: once indented two spaces with self-closing tags and
+an XML declaration (1,957 bytes), and once flat on a single line with paired
+tags and no declaration. `clipboard info` lists `«class XMSC»` twice, so the
+pasteboard appears to carry more than one flavour under that type. Which one a
+reader receives was not determined, and no cause was established.
+
+This is the whole-script type, not the `FMObjectList` step snippet this
+specification covers, so it does not change any rule in §1. Recorded because
+anyone reading the clipboard programmatically will meet it.
+
+### A.4 Two step ids exist but are not implemented in 26.0.3
+
+Execute URL (224) and Validate Scripts (239) are real ids that accept options
+and serialise with full structure, but FileMaker Pro 26.0.3 does not implement
+them: a script containing either renders in the Script Workspace as
+`#[OBSOLETE]`. A capture taken on that build therefore documents the shape
+without proving the step runs. Re-verify both on any build where the Script
+Workspace renders them as live steps rather than as comments.
+
+### A.5 Set Script Triggers state is not in the snippet
+
+Three Set Script Triggers (248) steps created with the state off, off and on
+serialise to byte-identical XML, while a read of the file reports `flags` of 0,
+0 and 131072 — bit 17, the same bit that carries the On/Off parameter on Allow
+User Abort (85), Set Error Capture (86) and Set Layout Object Animation (168).
+The state is stored in the file and is absent from the clipboard, so the step
+cannot round-trip through a snippet. Observed on 26.0.3, where the step's
+options also do not render in the editor, so this may be particular to that
+build rather than to the format.
+
 ## Appendix B: Preserved quirks in FileMaker's native output
 
 The following irregularities appear in FileMaker's own Copy output and
@@ -660,6 +695,14 @@ inside the attribute value. The trailing space is part of FileMaker's
 native output and must be preserved.
 
 ---
+
+### B.3 Step names differ between the palette and the snippet
+
+The `name` attribute in a snippet is not always what the step palette calls the
+step. Id 42 is `Page Setup` in the palette but `Print Setup` in snippet and in
+Save as XML output. Id 89 is `#` in the palette and `# (comment)` in a snippet.
+Emit the snippet spelling, which is what this specification lists, and match on
+the id when cross-referencing any other source.
 
 ## Appendix C: FM 26 PDF error codes
 
