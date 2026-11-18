@@ -1,33 +1,158 @@
 ---
-name: filemaker-ai-vocabulary
-description: Use this skill whenever Claude needs to name, call, or validate a FileMaker function or script step — writing a calculation, writing a script, checking whether a function or script step exists, checking parameter order or count, or checking whether a script step is supported on a given platform (Pro, Go, WebDirect, Server, Cloud, Data API, Custom Web Publishing). Trigger any time FileMaker calculation syntax or script step syntax is being written or reviewed. Do not name or call a FileMaker function or script step from memory alone — check the reference files first.
+name: filemaker-xml
+description: >
+  Use this skill whenever the user wants to work with FileMaker script XML or custom function XML.
+  This includes: generating FileMaker XML from a description, pseudocode, or
+  script steps; analysing or reviewing existing FileMaker XML for errors or
+  silent-failure risks; converting scripts between formats; or any task where
+  the output must be paste-ready XML for the FileMaker Script Workspace or Manage Custom Functions dialog.
+  Trigger any time the user mentions FileMaker scripts, fmxmlsnippet, Set
+  Variable XML, script step XML, custom function XML, or asks to produce XML that can be pasted
+  into FileMaker. Always use this skill — do not attempt FileMaker XML tasks
+  from memory alone, as the format has undocumented paste-handler rules that
+  cause silent failures without this reference.
 ---
 
-# FileMaker AI Vocabulary Skill
+# FileMaker Script & Custom Function XML Skill
 
-The authoritative, compressed vocabulary of every FileMaker Pro function and script step at FileMaker 26.1.1, with 26.0 as the floor. Consult it before naming or calling any function or step, so nothing invented, misspelled, or wrongly-signatured reaches the output.
+## Overview
 
-Created by Andrew Kear of Clockwork Creative Technology. Licence: CC BY 4.0.
+This skill enables Claude to correctly **analyse** and **generate** FileMaker
+Script Workspace XML — the `fmxmlsnippet type="FMObjectList"` format that
+FileMaker accepts via clipboard paste.
 
-## Critical rules (enforced before generating)
+The format has a lenient XML parser but a strict paste handler. Structural
+deviations that look fine as XML can cause steps to paste with silently missing
+data (e.g. Set Variable pastes with no variable name). The reference files in
+this skill are the authoritative reverse-engineered spec for what the paste
+handler actually accepts.
 
-1. **Only use functions and script steps that appear in the reference files.** Never invent one. If a plausible-sounding name is not listed, state that no such FileMaker function or step exists rather than guessing.
-2. **Function parameter order is authoritative.** Braces `{ }` mark optional parameters; an ellipsis marks a repeatable group. Do not reorder, drop, or add parameters. Three functions carry a second signature line for an alternate call form: `Substitute` and `JSONSetElement` (variadic bracket-pair forms) and `ComputeModel` (a distinct image-model parameter list).
-3. **Aggregate argument shapes.** `Sum`, `Count`, `Average`, `Max`, `Min`, `StDev`, `StDevP`, `Variance`, `VarianceP` show `{; field...}` but each field slot also accepts a repeating field, a related field (`table::field`), a semicolon-separated list of several fields, or cross-table match lists. The signature shows the canonical form; see the function file header.
-4. **Target is FileMaker 26.1.1, with 26.0 as the floor.** Every entry exists from 26.0 unless tagged `[26.1+]`, and a platform value of `26.1+` means No before 26.1 and Yes from 26.1. Use a `[26.1+]` function or step only when every client and host that will run it is on 26.1 or later; if the version is unknown, assume 26.0.x and use an alternative. Versions before 26 are not tracked — supporting them is a separate check this skill does not make.
-5. **The script step file is an index, not an option spec.** It carries each step's canonical name, internal ID, and platform support only. It deliberately does not list step options. For a step's options, element structure, or paste-ready XML, defer to the companion FileMaker Script XML and Field XML skills — do not reconstruct options from this file.
-6. **⚠ marks a platform exception, not the norm.** No ⚠ means the step is fully supported (Yes) on Pro, Go, WebDirect, Server, Cloud, Data API, and Custom Web Publishing. Where ⚠ appears, only the listed platforms deviate (No = skipped, returns error 3; Partial = runs but differs); treat all unlisted platforms as Yes. Check these flags before using a step in a server-scheduled, WebDirect, or Go workflow.
+---
 
-## Reference files
+## Mandatory reading — progressive loading
 
-Before producing any FileMaker function or script step in output, verify it against the relevant reference file. Each file carries its own header restating these rules.
+The specification (v2.1) is split so a task loads only the sections it
+needs. The rules are:
 
-- `references/clockwork_functions.md` — 375 functions (378 signature lines): `FunctionName ( params ) → return type`, with `[26.1+]` on functions new in 26.1.
-- `references/clockwork_scriptsteps.md` — 218 script steps: `Step Name   #internalID`, with `[26.1+]` on steps new in 26.1 and `⚠` platform flags where support is not universal.
+1. **Always read `references/core.md` first.** Not optional. It contains
+   the paste format requirements, common conventions, the Set Variable
+   canonical structure, and the silent-failure modes that apply to every
+   step. Skipping it reintroduces the from-memory failure mode this
+   skill exists to prevent.
+2. **Always read `references/steps-control.md`.** Control steps (If,
+   Loop, Perform Script, Exit Script, Comment, transactions) appear in
+   virtually every script.
+3. **Then read only the step category files containing the steps the
+   task needs**, using the routing index below. When reviewing XML someone else
+   produced, route by the `name` attributes on the `<Step>` elements
+   in the snippet.
+4. Custom function tasks: read `references/custom-functions.md`
+   (plus core.md — the wrapper differs but the conventions apply).
+5. MBS or other plugin steps: read `references/steps-plugin.md`.
+6. `references/worked-example.md` is optional background, not required
+   for any task.
 
-## What this skill does not cover
+When reviewing XML someone else produced, route by the step `id`
+attributes present in the snippet.
 
-- Calculation or script paste-format XML — companion FileMaker Script XML Skill
-- Field, table, or value list definition XML — companion FileMaker Field XML Skill
-- Layout object XML — companion FileMaker Layout XML Skill
-- Whether a referenced field, table, or JSON path exists in a given solution — this skill validates function and step syntax, not the logic built with them
+Do not rely on training data for FileMaker XML structure — always consult
+the reference files. The format contains non-obvious quirks (e.g. a
+trailing space in the `Configure RAG Account ` step name) that only
+appear in the spec.
+
+---
+
+## Version tags
+
+`[26.1+]` marks a step or an option that exists only from FileMaker 26.1.
+Emit it only when the target file and every client that will run the
+script are on 26.1 or later. If the version is unknown, assume 26.0.x and
+use the 26.0 form or another approach. Untagged entries were documented on
+FileMaker 26.0.3 and don't need 26.1 — apart from ids 224, 239 and 248,
+which are not usable at all (below).
+
+---
+
+## Routing index
+
+Set Variable (141) is documented in `core.md` §3 (its canonical
+structure is a silent-failure trap, so it lives with the core rules).
+
+Never generate id 248 ("Set Script Triggers"): the FileMaker 26.1 engine's
+step table has no name for it, so it is not a usable step (`core.md` A.5). Execute URL
+(224) and Validate Scripts (239) are inactive: FileMaker renders both as
+`#[OBSOLETE]` (`core.md` A.4).
+
+**`steps-control.md`** — Allow User Abort, Comment, Commit Transaction, Else, Else If, End If, End Loop, Exit Loop If, Exit Script, Halt Script, If, Install OnTimer Script, Loop, Open Transaction, Pause/Resume Script, Perform Script, Perform Script on Server, Perform Script on Server with Callback, Revert Transaction, Set Error Capture, Set Error Logging, Set Layout Object Animation, Set Revert Transaction on Error, Set Variable, Set Variable by Name `[26.1+]`, Trigger Claris Connect Flow
+
+**`steps-navigation-editing.md`** — Clear, Close Popover, Copy, Cut, Enter Browse Mode, Enter Find Mode, Enter Preview Mode, Go to Field, Go to Layout, Go to List of Records, Go to Next Field, Go to Object, Go to Portal Row, Go to Previous Field, Go to Record/Request/Page, Go to Related Record, Paste, Perform Find/Replace, Select All, Set Selection, Undo/Redo
+
+**`steps-fields-records.md`** — Commit Records/Requests, Constrain Found Set, Copy All Records/Requests, Copy Record/Request, Delete All Records, Delete Portal Row, Delete Record/Request, Duplicate Record/Request, Export Field Contents, Export Records, Extend Found Set, Find Matching Records, Import Records, Insert Audio/Video, Insert Calculated Result, Insert Current Date, Insert Current Time, Insert Current User Name, Insert File, Insert from Device, Insert from Index, Insert from Last Visited, Insert from URL, Insert PDF, Insert Picture, Insert Text, Modify Last Find, New Record/Request, Omit Multiple Records, Omit Record, Open Record/Request, Perform Find, Perform Quick Find, Relookup Field Contents, Replace Field Contents, Replace Field Contents by Name `[26.1+]`, Revert Record/Request, Save Records as Excel, Save Records as JSONL, Save Records as PDF, Save Records as Snapshot Link, Set Field, Set Field By Name, Set Next Serial Value, Show All Records, Show Omitted Only, Sort Records, Sort Records by Field, Truncate Table, Unsort Records
+
+**`steps-windows-files.md`** — Adjust Window, Arrange All Windows, Close Data File, Close File, Close Window, Convert File, Create Data File, Delete File, Freeze Window, Get Data File Position, Get File Exists, Get File Size, Move/Resize Window, New File, New Window, Open Data File, Open File, Print, Print Setup, Read from Data File, Recover File, Refresh Window, Rename File, Save a Copy as, Save a Copy as XML, Scroll Window, Select Window, Set Data File Position, Set Multi-User, Set Use System Formats, Set Window Title, Set Zoom Level, Show/Hide Menubar, Show/Hide Text Ruler, Show/Hide Toolbars, View As, Write to Data File
+
+**`steps-accounts-ai-misc.md`** — Add Account, Allow Formatting Bar, AVPlayer Play, AVPlayer Set Options, AVPlayer Set Playback State, Beep, Change Password, Check Found Set, Check Record, Check Selection, Configure AI Account, Configure Local Notification, Configure Machine Learning Model, Configure NFC Reading, Configure Persistent Data, Configure Prompt Template, Configure RAG Account, Configure Region Monitor Script, Configure Regression Model, Correct Word, Delete Account, Dial Phone, Edit User Dictionary, Enable Account, Enable Touch Keyboard, Execute FileMaker Data API, Execute SQL, Execute URL (inactive), Exit Application, Fine-Tune Model, Flush Cache to Disk, Flush Web Viewer Cookies, Generate Response from Model, Get Folder Path, Insert Embedding, Insert Embedding in Found Set, Insert Image Caption, Insert Image Captions in Found Set, Install Menu Set, Install Plug-In File, Open URL, Perform AppleScript, Perform Find by Natural Language, Perform JavaScript in Web Viewer, Perform RAG Action, Perform Semantic Find, Perform SQL Query by Natural Language, Re-Login, Refresh Object, Refresh Portal, Reset Account Password, Save a Copy as Add-on Package, Select Dictionaries, Send DDE Execute, Send Event, Send Mail, Set AI Call Logging, Set Dictionary, Set Session Identifier, Set Web Viewer, Show Custom Dialog, Speak, Spelling Options, Validate Scripts (inactive)
+
+**`steps-pdf.md`** — Append PDF, Cancel PDF, Close PDF, Create PDF, Open PDF, Print PDF
+
+**`steps-plugin.md`** — all MBS and other plugin steps (External step structure, §9)
+
+**`custom-functions.md`** — custom function definitions (§11): skeleton, attributes, parameters, recursion
+
+---
+
+## Task: Analysing existing XML
+
+When the user provides FileMaker XML to review:
+
+1. Read `core.md`, then the category files for the step ids present.
+2. Check against the silent-failure modes (core.md §7):
+   - **7.1** — `Name` element emitted as single-letter tag (Set Variable loses variable name)
+   - **7.2** — compact/single-line form instead of expanded child form
+   - **7.3** — Install OnTimer Script interval bound to wrong slot (interval emitted as bare `<Calculation>` instead of wrapped in `<Interval>`)
+   - **7.4** — rendering layer strips the canonical `Name` tag to a single letter before generation
+   - **7.5** — cross-file Perform Script missing `<FileReference>` (pastes as `<unknown>`)
+3. Check wrapper: must be `<?xml version="1.0" encoding="UTF-8"?>` + `<fmxmlsnippet type="FMObjectList">`.
+4. Check indentation: two spaces, no tabs.
+5. Check CDATA: all calculation content must be in `<Calculation><![CDATA[...]]></Calculation>`.
+6. For each step, verify the canonical skeleton matches the spec for that step ID/name.
+7. Report issues clearly, quoting the offending XML fragment and explaining the paste-time consequence.
+8. Offer a corrected version.
+
+---
+
+## Task: Generating XML
+
+When the user wants to generate FileMaker XML from a description or pseudocode:
+
+1. Read `core.md` and `steps-control.md`, then the category files for
+   the steps the task needs (routing index above).
+2. Look up each step's canonical skeleton in its category file.
+3. Apply the core.md §1 paste format requirements throughout:
+   - Wrap in `<?xml version="1.0" encoding="UTF-8"?>\n<fmxmlsnippet type="FMObjectList">...\n</fmxmlsnippet>`
+   - Two-space indent, no tabs
+   - CDATA for all calculations
+   - Expanded (not compact) child forms
+   - Correct element order per spec
+4. For schema references (table names, field names, layout names, script names):
+   - If the user has provided a DDR or explicit IDs, use those.
+   - Otherwise use the **placeholder-ID pattern**: `id="1"` everywhere, with `name` attributes matching the user's names. FileMaker will resolve real IDs on paste. (core.md §5)
+5. Emit the variable-name element for Set Variable and any other step that requires it using the correct four-letter form `Name` (capital N, lowercase a-m-e) as documented in core.md §3 and §5. Be aware of the rendering trap described in §7.4 — the tag must be the full word, not a single letter.
+6. Use ASCII comparison operators (`<>`, `<=`, `>=`) rather than Unicode equivalents — safer for transport (core.md §5).
+7. Output the complete XML inside a code block with `xml` syntax highlighting.
+8. After the XML, briefly note any assumptions made (e.g. placeholder IDs used, repetition defaulted to 1).
+
+---
+
+## Key conventions (quick reference — always verify against core.md)
+
+| Convention | Rule |
+|---|---|
+| Wrapper | `fmxmlsnippet type="FMObjectList"` |
+| Indent | 2 spaces, never tabs |
+| Calculations | `<Calculation><![CDATA[expr]]></Calculation>` |
+| Variable name tag | four-letter `Name` element, capital N (core.md §3) |
+| Schema IDs without DDR | `id="1"` + matching `name` attribute (placeholder-ID pattern) |
+| Comparison operators | ASCII: `<>` not `≠`, `<=` not `≤`, `>=` not `≥` |
+| Disabled steps | `enable="False"` on the `<Step>` element |
+| Comment divider (blank) | Self-closing `<Step enable="True" id="89" name="Comment"/>` |
