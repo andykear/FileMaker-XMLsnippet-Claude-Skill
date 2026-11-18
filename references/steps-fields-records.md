@@ -189,12 +189,39 @@ Notes:
 ```
 
 FM 26 adds `PerformAutoEnter` and `UseEntryOptions` attributes to
-`<SerialNumbers>`. The `increment` and `InitialValue` attributes are
-only present in serial number replacement mode; they may be absent in
-other modes.
+`<SerialNumbers>`. Which other attributes appear varies. Steps made in
+FileMaker's dialog in "current contents" mode carried only
+`PerformAutoEnter`, `UpdateEntryOptions` and `UseEntryOptions`; steps
+written another way, in calculation and serial number modes, carried
+`increment` and `InitialValue` as well. Those copies differ in both mode
+and origin, so which one decides it is not established. `increment` and
+`InitialValue` hold real values only in serial number replacement mode.
 
-`<With>` values: `None`, `CurrentContents` (FM 26). Other expected
-values for serial number and calculation modes not yet documented.
+`<With>` values: `None`, `CurrentContents` (FM 26), `SerialNumbers`,
+`Calculation` — the last two seen on Replace Field Contents by Name (249),
+which shares this step's options; expected here but not captured on this
+step.
+
+Configured through FileMaker's dialog with the dialog's defaults, replacing
+with the current contents (copied from FileMaker Pro 26.1, with
+`<DisableStepCollapsed>` removed as core.md §6.0 allows):
+```
+  <Step enable="True" id="91" name="Replace Field Contents">
+    <NoInteract state="True"/>
+    <Restore state="True"/>
+    <With value="CurrentContents"/>
+    <SerialNumbers PerformAutoEnter="True" UpdateEntryOptions="False" UseEntryOptions="True"/>
+    <Field table="T" id="1" name="f"/>
+  </Step>
+```
+
+`<Restore state="True"/>` marks the replace options as set. FileMaker's
+dialog wrote `True` on the configured steps copied on 26.1 (this one and
+249); the unconfigured skeleton above, a 26.0.3 capture, has `False`. On
+249 copies with `True`, the Script Workspace showed the auto-enter choice
+("Skip auto-enter options"); no 26.1 text rendering of this step was
+captured. Generate `True` for a configured step. `<Field>` comes last,
+after `<SerialNumbers>`.
 
 #### Set Field (76)
 ```
@@ -280,6 +307,11 @@ including any spacing):
   </Step>
 ```
 
+`[26.1+]` In Specify Field Order for Export, "Use field names as column
+names in first row" now applies to CSV as well as Excel, and moved there
+from the Excel Options dialog (FileMaker 26.1.1 release notes). How it
+appears in a configured step's XML has not been captured.
+
 #### Import Records (35)
 ```
   <Step enable="True" id="35" name="Import Records">
@@ -288,6 +320,11 @@ including any spacing):
     <VerifySSLCertificates state="False"/>
   </Step>
 ```
+
+`[26.1+]` The Import Field Mapping dialog has a new "Preserve target field
+data if source field is empty" option for the Update and Replace import
+actions (FileMaker 26.1.1 release notes). How it appears in a configured
+step's XML has not been captured.
 
 #### Revert Record/Request (51)
 ```
@@ -574,6 +611,11 @@ without live access to the target file's schema should flag the
 result for manual verification — a clean-looking paste here does not
 mean the step does what it looks like it does.
 
+Related: pasting a Perform Find into a file where its table or fields
+don't exist leaves it with no find criteria. From 26.1.1, Check for
+Problems reports this; on 26.0.x it doesn't, so check pasted find steps
+by eye (FileMaker 26.1.1 release notes).
+
 #### Sort Records (39)
 ```
   <Step enable="True" id="39" name="Sort Records">
@@ -634,7 +676,7 @@ documented.
   <Step enable="True" id="21" name="Unsort Records"/>
 ```
 
-#### Replace Field Contents by Name (249)
+#### Replace Field Contents by Name (249) `[26.1+]`
 ```
   <Step enable="True" id="249" name="Replace Field Contents by Name">
     <NoInteract state="True"/>
@@ -644,11 +686,13 @@ documented.
   </Step>
 ```
 
-Configured, replacing with a calculated result:
+Configured, replacing with a calculated result (matches FileMaker Pro 26.1's
+Copy output for such a step, `<DisableStepCollapsed>` removed; the target
+name is a placeholder):
 ```
   <Step enable="True" id="249" name="Replace Field Contents by Name">
     <NoInteract state="True"/>
-    <Restore state="False"/>
+    <Restore state="True"/>
     <With value="Calculation"/>
     <Calculation><![CDATA["x"]]></Calculation>
     <TargetName>
@@ -658,13 +702,54 @@ Configured, replacing with a calculated result:
   </Step>
 ```
 
-**FM 2026 step.** The by-name variant of Replace Field Contents (91). The target
-is `<TargetName>` holding a calculation, where 91 takes a `<Field>` reference.
+Configured, reserialising with serial numbers (captured from FileMaker Pro
+26.1's Copy output; the target name is a placeholder) — no bare
+`<Calculation>`, and the serial settings move into the `<SerialNumbers>`
+attributes:
+```
+  <Step enable="True" id="249" name="Replace Field Contents by Name">
+    <NoInteract state="True"/>
+    <Restore state="True"/>
+    <With value="SerialNumbers"/>
+    <TargetName>
+      <Calculation><![CDATA["test::PB_num"]]></Calculation>
+    </TargetName>
+    <SerialNumbers PerformAutoEnter="False" UpdateEntryOptions="False" increment="1" InitialValue="1" UseEntryOptions="False"/>
+  </Step>
+```
+
+**New in FileMaker 26.1** — not in 26.0.x. The by-name variant of Replace
+Field Contents (91). The target is `<TargetName>` holding a calculation,
+where 91 takes a `<Field>` reference.
 `<With value="...">` takes `None`, `CurrentContents`, `SerialNumbers` or
 `Calculation`, and the unconfigured step emits `None`. The bare
 `<Calculation>` carrying the replacement value precedes `<TargetName>` —
 two calculation slots in one step, so §7.3 ordering care applies.
-`<SerialNumbers>` is always emitted, with its attributes at defaults, even when
-`<With>` is not `SerialNumbers`.
+`<SerialNumbers>` is always emitted, even when `<With>` is not `SerialNumbers`.
+
+`<Restore state="True"/>` marks the step's replace options as set; on the
+26.1 copies with `True` and `PerformAutoEnter="False"`, the Script
+Workspace showed "Skip auto-enter options". FileMaker's own dialog wrote
+`True` on the configured steps copied on 26.1 (this step and Replace Field
+Contents (91)); the unconfigured skeleton above, a v2.0 capture, has
+`False`. Generate `True` for a configured step.
+Version 2.0 of this specification showed `False` on the configured example.
+
+Configured through FileMaker's dialog with the dialog's defaults (adapted
+from a FileMaker Pro 26.1 copy: the target is shown as the quoted field
+name it should be; the copy had an unquoted field reference) —
+`PerformAutoEnter` defaults to `True`, and in
+"current contents" mode `<SerialNumbers>` carries only three attributes:
+```
+  <Step enable="True" id="249" name="Replace Field Contents by Name">
+    <NoInteract state="True"/>
+    <Restore state="True"/>
+    <With value="CurrentContents"/>
+    <TargetName>
+      <Calculation><![CDATA["T::f"]]></Calculation>
+    </TargetName>
+    <SerialNumbers PerformAutoEnter="True" UpdateEntryOptions="False" UseEntryOptions="True"/>
+  </Step>
+```
 
 ---

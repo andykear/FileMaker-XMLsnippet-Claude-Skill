@@ -110,7 +110,11 @@ Options: `From` (File or Source), `Source file` (file path) or
 `Source` (container/variable), `Password` for encrypted PDFs.
 
 Errors: 831 (invalid password), 833 (PDF already open).
-WebDirect: From: File not supported.
+WebDirect: From: File not supported before 26.0.3. From 26.0.3, Open PDF
+and Append PDF can let WebDirect users upload a PDF, and Close PDF can let
+them download it (FileMaker 26.0.3 release notes; known issue: the Script
+Workspace shows the new options as unsupported). The XML for these options
+has not been captured.
 
 Unconfigured:
 ```
@@ -252,7 +256,10 @@ For File: output file path, `Automatically open file`,
 For Target: container field or variable, optional `Filename`.
 
 Error 5 if no PDF is open. Overwrites existing files without error.
-WebDirect: Save to File not supported.
+WebDirect: Save to File not supported before 26.0.3. From 26.0.3, Close
+PDF can let WebDirect users download the PDF (FileMaker 26.0.3 release
+notes; known issue: the Script Workspace shows the new options as
+unsupported). The XML for this option has not been captured.
 
 Unconfigured:
 ```

@@ -311,24 +311,25 @@ including the bare divider form, also includes
 `<Restore state="False"/>`. Like `DisableStepCollapsed` (core.md
 §6.0), not required for paste — generators may omit it.
 
-#### Set Script Triggers (248)
+#### Id 248 ("Set Script Triggers") — not a usable step
 ```
   <Step enable="True" id="248" name="Set Script Triggers"/>
 ```
 
-**FM 2026 step.** The On/Off state does not appear in the snippet. Three
-instances created with the state off, off and on serialise to byte-identical
-XML, while the file itself reports them as differing (`flags` 0, 0 and 131072 —
-bit 17). The state is stored but is not carried by the clipboard, so a pasted
-step takes the default rather than the state it was copied from. Observed on
-FileMaker Pro 26.0.3; see core.md Appendix A.5.
+**Do not generate.** The FileMaker 26.1 engine's step table has no name for id
+248 (a tool that writes steps through the engine refuses it for that reason),
+Claris documents no such step, and "Set Script Triggers" is not in the 26.0.3
+application binaries or in the 26.1 application. Where earlier 26.0.3
+snippets got that name was not established.
+Recorded only so a reviewer who meets it in someone else's XML knows what it
+is. See core.md Appendix A.5.
 
-#### Set Variable by Name (250)
+#### Set Variable by Name (250) `[26.1+]`
 ```
   <Step enable="True" id="250" name="Set Variable by Name"/>
 ```
 
-Configured:
+Configured (captured from FileMaker Pro 26.1's Copy output):
 ```
   <Step enable="True" id="250" name="Set Variable by Name">
     <Name>
@@ -343,10 +344,16 @@ Configured:
   </Step>
 ```
 
-**FM 2026 step.** The variable name is a calculation, not the literal text
-Set Variable (141) takes — `<Name>` wraps a `<Calculation>` here in every case,
-including the simple one. The element order is `<Name>`, `<Value>`,
-`<Repetition>`, matching Set Variable. The §7.1 name-drop risk applies: emit
-`<Name>` in full expanded form.
+**New in FileMaker 26.1** — not in 26.0.x. What a 26.0.x client does with it
+has not been tested; don't use it where 26.0.x clients run the script. The
+variable name is a calculation, not the literal text Set Variable (141)
+takes — `<Name>` wraps a `<Calculation>` here in every case, including the
+simple one. The element order is `<Name>`, `<Value>`, `<Repetition>`:
+**unlike Set Variable (141), where `<Name>` comes last** (core.md §3). Do
+not reorder either step to match the other: on 141, `<Name>` must stay
+last. `<Repetition>` was absent when no repetition was set. The Script
+Workspace shows the configured step as
+`Set Variable by Name [ "$v"[2] ; Value: 1 ]`. Emit `<Name>` in full
+expanded form.
 
 ---

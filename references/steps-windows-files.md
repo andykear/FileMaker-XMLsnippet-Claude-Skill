@@ -353,6 +353,12 @@ FM 26 new elements:
 - `<SaXML>` → `<JSONOptions>` → `<Calculation>` — catalog
   configuration as a JSONSetElement expression.
 
+FileMaker 26.1.1 changed the dialog's default for the "Specify options as
+JSON" calculation to build `catalogs_included` with the `List` function,
+which Claris says avoids empty array entries (FileMaker 26.1.1 release
+notes). The new default text has not been captured. Building the array
+with `List` is ordinary calculation syntax and works on 26.0 too.
+
 #### Set Multi-User (84)
 ```
   <Step enable="True" id="84" name="Set Multi-User">

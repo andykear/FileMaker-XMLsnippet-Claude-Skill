@@ -15,7 +15,7 @@ The script in human-readable form:
 
 ```
 Show Custom Dialog [ "Confirm" ; "Search active records?" ]
-If [ Get ( LastMessageChoice ) = 2 ]
+If [ Get ( LastMessageChoice ) = 1 ]
     Exit Script [ Text Result: "" ]
 End If
 Enter Find Mode [ Pause: Off ]
@@ -61,12 +61,12 @@ Yes/No choice means neither button commits:
 ```
 
 **Step 3: If / Exit Script / End If branch** (Section 8.1). The If
-test reads `LastMessageChoice = 2`, which is the second button (No):
+test reads `LastMessageChoice = 1`, which is the first button (No):
 
 ```
   <Step enable="True" id="68" name="If">
     <Restore state="False"/>
-    <Calculation><![CDATA[Get ( LastMessageChoice ) = 2]]></Calculation>
+    <Calculation><![CDATA[Get ( LastMessageChoice ) = 1]]></Calculation>
   </Step>
   <Step enable="True" id="103" name="Exit Script">
     <Calculation><![CDATA[""]]></Calculation>
@@ -151,7 +151,7 @@ output:
   </Step>
   <Step enable="True" id="68" name="If">
     <Restore state="False"/>
-    <Calculation><![CDATA[Get ( LastMessageChoice ) = 2]]></Calculation>
+    <Calculation><![CDATA[Get ( LastMessageChoice ) = 1]]></Calculation>
   </Step>
   <Step enable="True" id="103" name="Exit Script">
     <Calculation><![CDATA[""]]></Calculation>

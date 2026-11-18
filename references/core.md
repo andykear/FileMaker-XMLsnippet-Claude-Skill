@@ -1,10 +1,12 @@
 # Canonical XML Format for FileMaker Script Steps
 
 **Author:** Andrew Kear, Clockwork Creative Technology
-**Version:** 2.0
-**Date:** October 2026
-**Verified against:** FileMaker Pro 2026 on macOS. Where a rule is
-FM 2025-specific, it's flagged inline (see Appendix B).
+**Version:** 2.1
+**Date:** November 2026
+**Verified against:** FileMaker Pro 2026 (26.0.3) on macOS, with 26.1
+additions captured on FileMaker Pro 26.1. Where a rule is FM 2025-specific,
+it's flagged inline (see Appendix B); where it needs 26.1, it is tagged
+`[26.1+]`.
 **Licence:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
 — free to use, share, and adapt with attribution.
 
@@ -34,8 +36,9 @@ versions, so cross references such as "see Section 8.5" mean the file
 holding that section.
 
 Step skeletons in the category files show FileMaker's native minimal
-output; configured variants appear inline and all have been verified
-by round-trip testing. Every generated snippet must be wrapped in the
+output; configured variants appear inline and have been verified by
+round-trip testing, except where an entry says it was only captured
+from Copy output. Every generated snippet must be wrapped in the
 XML declaration and `fmxmlsnippet` element specified in Section 1.
 
 ---
@@ -45,8 +48,9 @@ XML declaration and `fmxmlsnippet` element specified in Section 1.
 **This document covers:** the structural XML format that
 `fmxmlsnippet type="FMObjectList"` clipboards must follow to paste
 cleanly into the FileMaker Script Workspace. It documents
-canonical skeletons for every script step in the FileMaker 2026
-palette — all 222 ids — verified
+canonical skeletons for every script step id documented through
+FileMaker 26.1 — 222 ids, of which three (224, 239, 248) are not usable
+steps (Appendix A.4, A.5) — verified
 configured forms for the steps most commonly used in real
 automation, and five known silent-failure modes.
 
@@ -55,7 +59,10 @@ FileMaker's full DDR (Database Design Report) format, runtime
 behaviour of any step, or what an LLM should *do* with this
 information beyond following it as a structural specification.
 
-**Verified environment:** FileMaker Pro 2026 (26.0.3) on macOS. The same
+**Verified environment:** FileMaker Pro 2026 (26.0.3) on macOS. Entries
+tagged `[26.1+]` come from FileMaker Pro 26.1's Copy output or from the
+FileMaker 26.1.1 release notes (each entry says which), and none has been
+pasted back and diffed. The same
 format is expected to work in FileMaker 19 onward and on Windows,
 but cross-version and cross-platform testing has not been performed.
 Reports of differences are welcome.
@@ -202,14 +209,17 @@ The following patterns recur across many step types:
   operations, finds, exports, etc. "With dialog: On" is
   `state="False"`.
 - `<Option state="True|False"/>` — a **generic** element whose meaning
-  depends on the step, and never a dialog setting. It is
-  `skipDataEntryValidation` on Commit Records/Requests, "Open file" on
-  Convert File (inverted, so `False` means open it), and the password
-  flag on Print PDF. Read it from the step's own entry; never assume it
-  across steps.
-- `<Restore state="True|False"/>` — indicates whether saved settings
-  are restored (find requests, GTRR options, sort orders, print
-  settings, import/export formats).
+  depends on the step. It is `skipDataEntryValidation` on Commit
+  Records/Requests, "Open file" on Convert File (inverted, so `False`
+  means open it), the password flag on Print PDF, and the "Use external
+  table's layouts" checkbox on Go to Related Record. Read it from the
+  step's own entry; never assume it across steps.
+- `<Restore state="True|False"/>` — usually indicates whether saved
+  settings are restored (find requests, sort orders, print settings,
+  import/export formats), but not always: on Go to Related Record it is
+  the "Show only related records" checkbox, and on Replace Field
+  Contents it marks the replace options as set. Read it from the step's
+  own entry.
 - `<SelectAll state="True|False"/>` — in insert and paste steps,
   controls whether the entire field is replaced (`True`) or content
   is inserted at the cursor (`False`).
@@ -218,7 +228,9 @@ The following patterns recur across many step types:
   Fine-Tune Model. When paths are set, populated variants hold a list
   of paths.
 - `<LayoutDestination value="OriginalLayout|CurrentLayout|SelectedLayout"/>` —
-  target layout selector for steps that reference a layout.
+  target layout selector for steps that reference a layout. `[26.1+]`
+  Go to Related Record with a table by calculation also takes
+  `LayoutNameByCalc` and `LayoutNumberByCalc` (steps-navigation-editing.md).
 - The four-letter `<Name>` tag (bytes `0x4E 0x61 0x6D 0x65`,
   capital N + lowercase a-m-e) is the canonical wrapper for any
   user-supplied identifier — variable names (Set Variable, Section 3),
@@ -392,7 +404,9 @@ only when the corresponding option is configured. Common examples:
 - Perform Script on Server emits `<Calculation>` only when a parameter
   is set.
 - Show Custom Dialog emits `<Message>` and `<Buttons>` only when
-  configured; the default skeleton is self-closing.
+  configured; on 26.0.3 the default skeleton is self-closing. Every
+  FileMaker 26.1 copy of a configured dialog so far (five) also has
+  `<AutoCloseTimer>`; an unconfigured dialog has not been captured on 26.1.
 
 ## 7. Known silent-failure modes
 
@@ -544,6 +558,12 @@ Section 5's "External data source references" bullet above, which already
 notes these steps "carry the data source name but not the file's
 location.")
 
+**Related paste bug, fixed in 26.1.1:** before 26.1.1, pasting a script
+step with an external file reference into the very file it referenced
+created an external data source that pointed to the current file
+(FileMaker 26.1.1 release notes). On 26.0.x, don't paste a cross-file
+step into its own target file; generate the same-file form instead.
+
 ### Pattern across all five
 
 Each silent-failure case involves an element name or wrapper where
@@ -598,15 +618,22 @@ Three distinct `Styles` attribute values have been observed on
 `<NewWndStyles>` elements:
 
 - `Styles="983554"` — emitted on configured Go to Related Record steps
-  taken from production scripts. Round-trip verified as the default
-  value for any configured GTRR (with or without new-window options)
-  whose window-style attributes (`Style`, `Close`, `Minimize`,
-  `Maximize`, `Resize`) are unmodified from FM's defaults. Generators
-  emitting GTRR steps without explicit window-style configuration
-  should use this value — it round-trips unchanged through Copy/Paste/
-  save cycles.
+  taken from production scripts in versions before 26.1, and round-trip
+  verified there as the default value for any configured GTRR (with or
+  without new-window options) whose window-style attributes (`Style`,
+  `Close`, `Minimize`, `Maximize`, `Resize`) are unmodified from FM's
+  defaults. Generators targeting those versions should use this value —
+  it round-trips unchanged through Copy/Paste/save cycles there.
+  FileMaker 26.1 has emitted `3606018` on every configured GTRR copied so
+  far (see below); whether 26.1 keeps `983554` on paste has not been
+  tested.
 - `Styles="3606018"` — emitted on default or unconfigured Go to Related
-  Record, New Window, and Go to List of Records steps.
+  Record, New Window, and Go to List of Records steps. Also observed on
+  every configured GTRR copied from FileMaker Pro 26.1 so far — eight
+  written by a tool, including one with a new window, and one from a
+  production script made in FileMaker's dialog. Why 26.1 writes this
+  value for configured steps is not established, and when that
+  production step was created is not known.
 - `Styles="1076299266"` — emitted on a New Window step configured with
   a window name and additional window-style options
   (DimParentWindow=No, Toolbars=Yes, MenuBar=Yes).
@@ -655,25 +682,28 @@ This is the whole-script type, not the `FMObjectList` step snippet this
 specification covers, so it does not change any rule in §1. Recorded because
 anyone reading the clipboard programmatically will meet it.
 
-### A.4 Two step ids exist but are not implemented in 26.0.3
+### A.4 Two step ids exist but are not implemented in 26.0 or 26.1
 
 Execute URL (224) and Validate Scripts (239) are real ids that accept options
-and serialise with full structure, but FileMaker Pro 26.0.3 does not implement
-them: a script containing either renders in the Script Workspace as
-`#[OBSOLETE]`. A capture taken on that build therefore documents the shape
-without proving the step runs. Re-verify both on any build where the Script
-Workspace renders them as live steps rather than as comments.
+and serialise with full structure, but FileMaker Pro does not implement them:
+a script containing either renders in the Script Workspace as
+`#[OBSOLETE]`, on 26.0.3 and again on FileMaker Pro 26.1. A capture
+therefore documents the shape without proving the step runs. Neither appears
+in Claris's release notes or help. Do not generate either; re-verify on any
+build where the Script Workspace renders them as live steps rather than as
+comments.
 
-### A.5 Set Script Triggers state is not in the snippet
+### A.5 Id 248 is not a usable step
 
-Three Set Script Triggers (248) steps created with the state off, off and on
-serialise to byte-identical XML, while a read of the file reports `flags` of 0,
-0 and 131072 — bit 17, the same bit that carries the On/Off parameter on Allow
-User Abort (85), Set Error Capture (86) and Set Layout Object Animation (168).
-The state is stored in the file and is absent from the clipboard, so the step
-cannot round-trip through a snippet. Observed on 26.0.3, where the step's
-options also do not render in the editor, so this may be particular to that
-build rather than to the format.
+The FileMaker 26.1 engine's step table has no name for id 248 (a tool that
+writes steps through the engine refuses it for that reason). "Set Script
+Triggers" is not in the 26.0.3 application binaries or in the 26.1
+application, and Claris documents no such step. Where earlier 26.0.3
+snippets got that name was not established. Earlier observations on
+26.0.3 — the step's options not rendering in the editor, and three
+instances created off, off and on serialising to byte-identical XML while
+the file reported `flags` 0, 0 and 131072 (bit 17) — fit an unimplemented
+id rather than a quirk of the format. Never generate it.
 
 ## Appendix B: Preserved quirks in FileMaker's native output
 

@@ -83,6 +83,9 @@ Notes:
   This may be a silent-failure trap.
 - Element order (Set): `Option` → `Value` → `InstanceId` → `Name`.
 - Element order (Delete): `Option` → `InstanceId` → `Name`.
+- `[26.1+]` In Set mode, a `<Value>` calculation that returns only the
+  ␡ character (`Char ( 9249 )`) deletes the entry, the same as Delete
+  mode (FileMaker 26.1.1 release notes; the XML was not re-captured).
 
 ---
 
@@ -360,6 +363,13 @@ Configured, `<Table>` pointing at a real table occurrence:
     <LLMBulkEmbedding/>
   </Step>
 ```
+
+`[26.1+]` For Google's `gemini-embedding-2` model, Insert Embedding, Insert
+Embedding in Found Set and Perform Semantic Find (218) support image
+embeddings (AVIF, BMP, GIF, HEIC, JPEG, PNG, WebP, smaller than 100 MB), and
+their Parameters option accepts a `task_type` (or `taskType`) key (FileMaker
+26.1.1 release notes). These steps' XML has not been captured on 26.1; image
+input may add elements not shown here.
 
 #### Perform Find by Natural Language (221)
 ```
@@ -693,6 +703,11 @@ With object name:
   </Step>
 ```
 
+`[26.1+]` Runs in scripts performed by FileMaker Server from 26.1; the add-on
+is written to the CreatedAddons folder in the host's Documents folder
+(FileMaker 26.1.1 release notes; the XML was not re-captured). Before 26.1
+it is not supported on Server.
+
 #### Send DDE Execute (64)
 ```
   <Step enable="True" id="64" name="Send DDE Execute">
@@ -777,7 +792,8 @@ FileMaker's canonical output. The `<URL>` element wraps a
 
 Configured steps emit children in fixed order: optional `<Title>` →
 `<Message>` → optional `<Height>` → `<Width>` → `<DistanceFromTop>` →
-`<DistanceFromLeft>` → `<Buttons>`. `<Title>` and `<Message>` each
+`<DistanceFromLeft>` → `<AutoCloseTimer>` (`[26.1+]`, see below) →
+`<Buttons>`. `<Title>` and `<Message>` each
 wrap a `<Calculation>`. `<Buttons>` always contains exactly three
 `<Button>` slots — unused slots are self-closing.
 `CommitState="True"` on a button indicates that the button commits
@@ -789,6 +805,9 @@ calculation elements specifying dialog size and position in points.
 They sit between `<Message>` and `<Buttons>`. All are optional —
 unspecified values use defaults. FileMaker Go does not support size
 and position.
+
+Example, in the 26.0 form (FileMaker 26.1 also writes `<AutoCloseTimer>`
+just before `<Buttons>`; see Close after below):
 ```
   <Step enable="True" id="87" name="Show Custom Dialog">
     <Title>
@@ -820,6 +839,33 @@ and position.
     </Buttons>
   </Step>
 ```
+
+**Close after (seconds) `[26.1+]`** (captured from FileMaker Pro 26.1's
+Copy output; pasting it has not been tested). The dialog can close itself
+after a calculated number of seconds, and `Get ( LastMessageChoice )` then
+returns 0 (FileMaker 26.1.1 release notes). Every 26.1 copy of a configured
+dialog so far — four written by a tool and one made in FileMaker's own
+dialog, with the timer on and off — includes `<AutoCloseTimer>` as the last
+element before `<Buttons>`, after any size and position elements:
+```
+    <AutoCloseTimer HasTimer="False"/>
+```
+With the option on:
+```
+    <AutoCloseTimer HasTimer="True">
+      <AutoCloseSecond>
+        <Calculation><![CDATA[5]]></Calculation>
+      </AutoCloseSecond>
+    </AutoCloseTimer>
+```
+The child is `<AutoCloseSecond>`, singular. With the timer on and no button
+labels, `<Buttons>` still holds three empty slots; how such a dialog
+displays was not tested. The Script Workspace shows the option as
+`Close after (seconds):5`. An unconfigured dialog has not been captured on
+26.1. Leave `<AutoCloseTimer>` out for a 26.0.x target; what a 26.0 client
+does with it on paste has not been tested. Whether 26.1 accepts a dialog
+without `<AutoCloseTimer>` on paste, as the templates above are written,
+has not been tested either.
 
 **Single OK (alert) — OK commits:**
 ```
@@ -870,7 +916,7 @@ and position.
 ```
 
 The clicked button is reported by `Get ( LastMessageChoice )` as
-1, 2, or 3.
+1, 2, or 3 — or 0 when a `[26.1+]` Close after timer closed the dialog.
 
 #### Speak (66)
 ```
@@ -888,11 +934,25 @@ The clicked button is reported by `Get ( LastMessageChoice )` as
   </Step>
 ```
 
-**Not active in FileMaker Pro 26.0.3.** The Script Workspace renders this id as
-`#[OBSOLETE] Execute URL`, so the capture above is structural only and the step
-does not run on that build. `<DontEncodeURL>` is emitted even though it is not
-among the options the step declares. Needs re-verification on a build where the
-step is live before being relied on.
+Configured with a URL and a callback script (copied from FileMaker Pro 26.1,
+with `<DisableStepCollapsed>` removed as core.md §6.0 allows):
+```
+  <Step enable="True" id="224" name="Execute URL">
+    <DontEncodeURL state="False"/>
+    <VerifySSLCertificates state="True"/>
+    <Calculation><![CDATA["https://example.com"]]></Calculation>
+    <CallbackScript>
+      <Script id="1" name="Callback"/>
+    </CallbackScript>
+  </Step>
+```
+
+**Not active in FileMaker Pro 26.0.3 or 26.1. Do not generate.** The Script
+Workspace renders this id as `#[OBSOLETE] Execute URL` on both, so the
+captures above are structural only; the step is not expected to run (it was
+not executed). Claris documents
+no such step. `<DontEncodeURL>` is emitted even though it is not among the
+options the step declares. See core.md A.4.
 
 #### Validate Scripts (239)
 ```
@@ -915,8 +975,17 @@ step is live before being relied on.
   </Step>
 ```
 
-**Not active in FileMaker Pro 26.0.3**, same as Execute URL (224) above. The
-unconfigured step is not empty: FileMaker pre-fills `<Instruction>` with a long
+With one script chosen (copied from FileMaker Pro 26.1), `<Scripts>` held one
+`<Script>`; that copy also had `<Option state="True"/>`, whose
+meaning has not been established:
+```
+      <Scripts>
+        <Script id="1" name="Callback"/>
+      </Scripts>
+```
+
+**Not active in FileMaker Pro 26.0.3 or 26.1. Do not generate**, same as
+Execute URL (224) above. The unconfigured step is not empty: FileMaker pre-fills `<Instruction>` with a long
 default prompt beginning "Review the following FileMaker scrips" — the
 misspelling is FileMaker's own. A generator emitting this step bare will not
 match native output unless it reproduces that default.

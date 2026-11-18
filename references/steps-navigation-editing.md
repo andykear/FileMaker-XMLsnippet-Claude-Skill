@@ -94,6 +94,11 @@ matching name. Not a general guarantee about how `<Layout>` resolves;
   </Step>
 ```
 
+`[26.1+]` Behaviour change in 26.1.1: the step now sorts records in the order of
+the record IDs in the list; before 26.1.1 it didn't (FileMaker 26.1.1
+release notes). This is a runtime fix; nothing in the release notes
+points to a change in the step's XML.
+
 #### Go to Object (145)
 ```
   <Step enable="True" id="145" name="Go to Object"/>
@@ -147,31 +152,42 @@ With object name:
 Element order is fixed: `Option` → `MatchAllRecords` →
 `ShowInNewWindow` → `Restore` → `LayoutDestination` → optional
 `Name` → optional dimensions → `NewWndStyles` → `Table` → `Layout`.
+FM 26 native Copy output also places `<DisableStepCollapsed>` between
+`ShowInNewWindow` and `Restore` (core.md §6.0; optional on paste).
 
 `<NewWndStyles>` is always present, regardless of new-window state.
 
-Element semantics — verified by round-trip against production scripts:
+Element semantics — mapped on FileMaker Pro 26.1 by matching each copied
+element against the Script Workspace's text for the same step (eight
+test steps), and checked against a GTRR from a production script:
 
-- `<Option state="True|False"/>` — "Show only related records" in the
-  GTRR dialog. `True` constrains the destination found set to the
-  related set; `False` shows all records on the destination layout.
+- `<Restore state="True|False"/>` — **"Show only related records"** in
+  the GTRR dialog. `True` creates a new found set of the related
+  records. When it is off, Go to Related Record makes the first record
+  in the table's unsorted order the current record (Claris Help).
   This is the most consequential GTRR option and the most commonly
-  set; the default in the dialog is `True` for new GTRR steps in most
-  production contexts but `False` in the unconfigured XML emission.
-  Generators that omit this element or set it incorrectly will
-  silently produce the wrong found-set behaviour at runtime — the
-  step pastes and runs, just on the wrong record set.
+  set; it is `False` in the unconfigured XML emission. Generators that
+  get it wrong silently produce the wrong found-set behaviour at
+  runtime — the step pastes and runs, just on the wrong record set.
 - `<MatchAllRecords state="True|False"/>` — "Match found set" in the
   dialog. `True` matches against the entire found set on the source
   side; `False` matches only the current record. Almost always
   `False` in practice.
 - `<ShowInNewWindow state="True|False"/>` — controls the new-window
-  branch. When `True`, the optional `<n>` (window-name calculation)
+  branch. When `True`, the optional `<Name>` (window-name calculation)
   and dimension elements may appear before `<NewWndStyles>`.
-- `<Restore state="True|False"/>` — restore saved sort/find settings
-  attached to the GTRR step. Maps to whether the step has a stored
-  sort order or find criteria from the dialog. Almost always `True`
-  in configured GTRRs even when no specific settings are saved.
+- `<Option state="True|False"/>` — **"Use external table's layouts"**.
+  `True` only when the related table occurrence comes from another file
+  and the step shows the records on a layout in that file; the Script
+  Workspace then shows `External;`. `False` everywhere else, including
+  an external table shown on a layout in this file. Claris: the option
+  is only available when the source relationship references a table in
+  another file.
+
+Earlier versions of this specification put "Show only related records"
+on `<Option>` and described `<Restore>` as stored sort/find settings;
+both were wrong. The `<Option>`/`<Restore>` states in the examples below
+agree with 26.1 output.
 
 **Basic form** — existing window, no custom dimensions:
 ```
@@ -238,6 +254,39 @@ step generated in this shape does not save. Use the Basic form above
 for anything actually meant to be pasted and used; this one is
 documentation of what "not yet set up" looks like, not something to
 generate on purpose.
+
+**Table by calculation `[26.1+]`** (captured from FileMaker Pro 26.1's
+Copy output; pasting it has not been tested). The "Get related record from" option can name the table
+occurrence with a calculation. `<Table>` then has `id="0" name=""` and
+wraps a `<Calculation>`, and the layout is either the current one or a
+layout chosen by calculation:
+```
+  <Step enable="True" id="74" name="Go to Related Record">
+    <Option state="False"/>
+    <MatchAllRecords state="False"/>
+    <ShowInNewWindow state="False"/>
+    <Restore state="True"/>
+    <LayoutDestination value="LayoutNameByCalc"/>
+    <NewWndStyles Style="Document" Close="Yes" Minimize="Yes" Maximize="Yes" Resize="Yes" Styles="3606018"/>
+    <Table id="0" name="">
+      <Calculation><![CDATA["table occurrence name"]]></Calculation>
+    </Table>
+    <Layout>
+      <Calculation><![CDATA["layout name"]]></Calculation>
+    </Layout>
+  </Step>
+```
+
+`<LayoutDestination>` values with a calculated table:
+- `CurrentLayout` — no `<Layout>` element.
+- `LayoutNameByCalc` — `<Layout>` wraps a `<Calculation>` returning the
+  layout name, with no `id` or `name` attribute.
+- `LayoutNumberByCalc` — the same `<Layout>` shape, the calculation
+  returning a layout number.
+
+The Script Workspace shows these as `From table: "T" ; Using layout:
+<Current Layout>` (or the calculated name or number). A 26.0.x client
+has no table-by-calculation option; do not emit this form for 26.0.
 
 ---
 

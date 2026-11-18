@@ -35,6 +35,12 @@ Custom functions use the same `fmxmlsnippet type="FMObjectList"` wrapper as scri
 | `parameters` | string | Semicolon-separated parameter names. Empty string `""` for zero parameters. |
 | `name` | string | If a CF with this name already exists in the target file, FileMaker pastes it as a new CF with an auto-incremented name suffix (e.g. `CF_Test 2`). It does not overwrite. |
 
+`[26.1+]` FileMaker 26.1.1 lets the Edit Custom Function dialog store a
+description for the function and for each of its parameters; the
+GetToolDefinitions function reads them (FileMaker 26.1.1 release notes).
+How these descriptions appear in custom function XML has not been
+captured. A snippet without them is the 26.0 form.
+
 ### 11.4 Parameters
 
 Parameters are semicolon-separated in the `parameters` attribute — not comma-separated:
